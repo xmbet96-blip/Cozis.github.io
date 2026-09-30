@@ -105,8 +105,17 @@
 
     window.firebaseAppInit = async function() {
       try {
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'cozis-nfc-app';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { apiKey: "mock", projectId: "mock" };
+        const appId = 'cozisnfc-app';
+        const firebaseConfig = {
+          apiKey: "AIzaSyA2SA4DjiYfxk_n-10xg5o8-MFJwTv_QFM",
+          authDomain: "cozisnfc.firebaseapp.com",
+          databaseURL: "https://cozisnfc-default-rtdb.europe-west1.firebasedatabase.app",
+          projectId: "cozisnfc",
+          storageBucket: "cozisnfc.firebasestorage.app",
+          messagingSenderId: "724371737201",
+          appId: "1:724371737201:web:96078dedb1e25094e6a9d0",
+          measurementId: "G-NLK7RHJ2WK"
+        };
         
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
@@ -123,11 +132,7 @@
         window.fsDeleteDoc = deleteDoc;
         window.fsOnSnapshot = onSnapshot;
 
-        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-          await signInWithCustomToken(auth, __initial_auth_token);
-        } else {
-          await signInAnonymously(auth);
-        }
+        await signInAnonymously(auth);
 
         console.log("Firebase initialized successfully. UID:", auth.currentUser?.uid);
         if (typeof window.initAppAfterAuth === 'function') {
@@ -155,7 +160,7 @@
             <span class="font-display font-extrabold text-3xl tracking-tight text-brand-400">cozis</span>
             <span class="font-display font-bold text-xs uppercase px-2.5 py-0.5 rounded-md bg-brand-500/20 text-brand-300 border border-brand-500/30 tracking-wider">NFC</span>
           </div>
-          <p id="auth-subtitle" class="text-xs text-slate-400">Авторизация организации / кассира (Фирменная фиолетовая тема)</p>
+          <p id="auth-subtitle" class="text-xs text-slate-400">Авторизация организации / кассира</p>
         </div>
 
         <form onsubmit="handleAuthSubmit(event)" class="space-y-4">
@@ -263,7 +268,6 @@
           </div>
         </div>
 
-        <!-- Desktop Navigation -->
         <nav class="hidden md:flex items-center space-x-1 bg-slate-900/80 p-1 rounded-xl border border-slate-800">
           <button id="nav-pos" onclick="switchTab('pos')" class="px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center space-x-2 bg-brand-600 text-white shadow-md">
             <i class="fa-solid fa-id-card"></i>
@@ -297,7 +301,6 @@
         </div>
       </header>
 
-      <!-- Mobile Bottom Navigation Bar -->
       <div class="md:hidden fixed bottom-0 left-0 right-0 z-40 glass-panel border-t border-slate-800 px-4 py-2 flex justify-around items-center bg-slate-950/95">
         <button id="mob-nav-pos" onclick="switchTab('pos')" class="flex flex-col items-center space-y-1 text-brand-400 py-1 px-3">
           <i class="fa-solid fa-id-card text-lg"></i>
@@ -315,7 +318,6 @@
 
       <main class="flex-1 p-3 sm:p-6 max-w-7xl w-full mx-auto flex flex-col space-y-6">
 
-        <!-- TAB 1: POS TERMINAL VIEW -->
         <div id="tab-content-pos" class="space-y-6 animate-fade-in">
           
           <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
@@ -389,7 +391,6 @@
                 </div>
               </div>
 
-              <!-- Web NFC Button for Android / Mobile Browsers -->
               <button onclick="requestWebNFCScan()" class="w-full bg-slate-900 hover:bg-slate-800 border border-brand-500/30 text-brand-300 py-3 rounded-2xl font-bold text-xs flex items-center justify-center space-x-2 transition-all">
                 <i class="fa-solid fa-mobile-screen-button text-brand-400"></i>
                 <span>Активировать Web NFC сканер (Android)</span>
@@ -482,9 +483,7 @@
           </div>
         </div>
 
-        <!-- TAB 2: CARDS LIST VIEW -->
         <div id="tab-content-clients" class="hidden space-y-6 animate-fade-in">
-          
           <div class="glass-panel p-4 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-4">
             <div class="relative w-full md:w-96">
               <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-500 text-sm"></i>
@@ -513,76 +512,47 @@
               </table>
             </div>
           </div>
-
         </div>
 
-        <!-- TAB 3: STATS VIEW -->
         <div id="tab-content-stats" class="hidden space-y-6 animate-fade-in">
-          
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div class="glass-panel p-5 rounded-2xl border-t-2 border-t-brand-500">
               <p class="text-xs text-slate-400 font-medium">Активность за 30 дней</p>
               <h3 id="stat-30days" class="text-3xl font-extrabold font-display text-white mt-1">0</h3>
-              <p class="text-xs text-purple-400 flex items-center mt-2">
-                <i class="fa-solid fa-arrow-trend-up mr-1"></i> Динамика базы организации
-              </p>
             </div>
-
             <div class="glass-panel p-5 rounded-2xl border-t-2 border-t-purple-500">
               <p class="text-xs text-slate-400 font-medium">Среднее кол-во визитов</p>
               <h3 id="stat-avg-visits" class="text-3xl font-extrabold font-display text-white mt-1">0.0</h3>
-              <p class="text-xs text-slate-400 mt-2">визитов на 1 карту</p>
             </div>
-
             <div class="glass-panel p-5 rounded-2xl border-t-2 border-t-violet-500">
-              <p class="text-xs text-slate-400 font-medium">Активные карты (Retention)</p>
+              <p class="text-xs text-slate-400 font-medium">Активные карты</p>
               <h3 id="stat-retention" class="text-3xl font-extrabold font-display text-white mt-1">100%</h3>
-              <p class="text-xs text-purple-400 flex items-center mt-2">
-                <i class="fa-solid fa-check mr-1"></i> База лояльности
-              </p>
             </div>
-
             <div class="glass-panel p-5 rounded-2xl border-t-2 border-t-brand-700">
               <p class="text-xs text-slate-400 font-medium">Выдано вознаграждений</p>
               <h3 id="stat-rewards-total" class="text-3xl font-extrabold font-display text-white mt-1">0</h3>
-              <p class="text-xs text-brand-300 mt-2">за весь период</p>
             </div>
           </div>
 
           <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            
             <div class="lg:col-span-8 glass-panel p-5 sm:p-6 rounded-3xl space-y-4">
               <div class="flex justify-between items-center flex-wrap gap-2">
                 <div>
                   <h3 class="font-display font-bold text-base sm:text-lg text-white">Распределение визитов по дням недели</h3>
-                  <p class="text-xs text-slate-400">Динамика на основе реальных счетчиков организации</p>
+                  <p class="text-xs text-slate-400">Динамика на основе счетчиков организации</p>
                 </div>
                 <span id="stat-total-scans-badge" class="text-xs font-mono bg-slate-900 border border-slate-800 px-3 py-1 rounded-xl text-brand-300">
                   Всего: 0
                 </span>
               </div>
-
               <div id="stats-chart-container" class="pt-6 pb-2 px-1 sm:px-2 flex items-end justify-between h-56 border-b border-slate-800 space-x-1 sm:space-x-2"></div>
-              <div class="flex justify-between text-xs text-slate-400 pt-1">
-                <span id="stats-chart-peak-info">Пик визитов: —</span>
-                <span class="text-brand-300">NTAG215 Cloud Telemetry</span>
-              </div>
             </div>
-
             <div class="lg:col-span-4 glass-panel p-5 sm:p-6 rounded-3xl space-y-4 flex flex-col justify-between">
               <div>
                 <h3 class="font-display font-bold text-lg text-white mb-1">Топ постоянных карт</h3>
-                <p class="text-xs text-slate-400 mb-4">Клиенты с наибольшим количеством визитов</p>
-                
                 <div id="stats-leaderboard" class="space-y-3"></div>
               </div>
-
-              <div class="bg-brand-950/40 border border-brand-800/40 rounded-2xl p-3 text-center mt-4">
-                <p class="text-xs text-brand-300 font-medium">Мобильный облачный кабинет</p>
-                <p class="text-[10px] text-slate-400 mt-0.5">Данные синхронизированы в реальном времени</p>
-              </div>
             </div>
-
           </div>
         </div>
 
@@ -590,18 +560,14 @@
 
       <div id="register-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
         <div class="glass-panel w-full max-w-xl rounded-3xl p-6 sm:p-8 border border-brand-500/30 shadow-2xl relative">
-          
           <button onclick="closeRegisterModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white text-lg p-2">
             <i class="fa-solid fa-xmark"></i>
           </button>
-
           <h3 class="font-display font-bold text-2xl text-white mb-1">Создание карты NTAG215</h3>
-          <p class="text-xs text-slate-400 mb-6">Приложите физическую карту (включая Магнит/Тройку) к смартфону или задайте UID вручную</p>
+          <p class="text-xs text-slate-400 mb-6">Приложите физическую карту к смартфону или задайте UID вручную</p>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
             <form id="register-card-form" onsubmit="handleRegisterSubmit(event)" class="space-y-4">
-              
               <div>
                 <label class="text-xs font-semibold text-slate-300 mb-1 flex items-center justify-between">
                   <span>UID Чипа NTAG215 *</span>
@@ -614,17 +580,14 @@
                   </button>
                 </div>
               </div>
-
               <div>
                 <label class="text-xs font-semibold text-slate-300 mb-1 block">Нэймтэг / Псевдоним *</label>
                 <input type="text" id="reg-nametag" required placeholder="Например: @fox_owner" class="w-full glass-input px-3 py-3 text-xs text-white rounded-xl focus:outline-none" oninput="updateLiveCardPreview()">
               </div>
-
               <div>
                 <label class="text-xs font-semibold text-slate-300 mb-1 block">Стартовые бонусы</label>
                 <input type="number" id="reg-bonus" value="100" class="w-full glass-input px-3 py-3 text-xs text-white rounded-xl focus:outline-none">
               </div>
-
               <div class="pt-2">
                 <button type="submit" class="w-full bg-gradient-to-r from-brand-500 to-brand-700 hover:from-brand-400 hover:to-brand-600 text-white py-3.5 rounded-xl font-bold text-sm shadow-lg shadow-brand-700/30 transition-all">
                   Активировать карту
@@ -634,29 +597,20 @@
 
             <div class="flex flex-col items-center justify-center space-y-3 bg-slate-900/60 p-4 rounded-2xl border border-slate-800">
               <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Макет карты</label>
-              
               <div class="w-full max-w-[240px] h-[150px] rounded-2xl nfc-card-bg p-4 flex flex-col justify-between text-white relative shadow-2xl overflow-hidden">
-                
                 <div class="flex justify-between items-start">
                   <div class="flex items-center space-x-1 bg-white/90 px-2 py-0.5 rounded-lg shadow-sm">
                     <span class="font-display font-extrabold text-xs text-brand-700">cozis</span>
                   </div>
                   <i class="fa-solid fa-wifi rotate-90 text-white/80 text-xs"></i>
                 </div>
-
                 <div class="w-7 h-5 rounded bg-purple-300/90 border border-purple-200/50"></div>
-
                 <div>
-                  <p id="prev-card-nametag" class="font-display font-bold text-base tracking-wide truncate text-white">
-                    @nametag
-                  </p>
-                  <p id="prev-card-uid" class="font-mono text-[10px] text-purple-200/80">
-                    04:XX:XX:XX
-                  </p>
+                  <p id="prev-card-nametag" class="font-display font-bold text-base tracking-wide truncate text-white">@nametag</p>
+                  <p id="prev-card-uid" class="font-mono text-[10px] text-purple-200/80">04:XX:XX:XX</p>
                 </div>
               </div>
             </div>
-
           </div>
         </div>
       </div>
@@ -667,18 +621,11 @@
             <i class="fa-solid fa-gift"></i>
           </div>
           <h3 class="font-display font-bold text-lg text-white">Списание бонусов</h3>
-          <p id="redeem-modal-subtitle" class="text-xs text-slate-400">Укажите количество бонусов для списания у клиента</p>
-          
           <div class="space-y-3 pt-1">
             <input type="number" id="redeem-amount-input" min="1" value="100" class="w-full glass-input px-4 py-3 text-center text-lg font-bold text-purple-400 rounded-xl focus:outline-none">
-            
             <div class="flex space-x-3 pt-2">
-              <button onclick="closeRedeemModal()" class="flex-1 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition-colors">
-                Отмена
-              </button>
-              <button onclick="executeRedeemBonus()" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-brand-500 to-purple-600 hover:from-brand-400 hover:to-purple-500 text-white text-xs font-semibold shadow-lg shadow-brand-600/30 transition-colors">
-                Списать
-              </button>
+              <button onclick="closeRedeemModal()" class="flex-1 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition-colors">Отмена</button>
+              <button onclick="executeRedeemBonus()" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-brand-500 to-purple-600 hover:from-brand-400 hover:to-purple-500 text-white text-xs font-semibold shadow-lg shadow-brand-600/30 transition-colors">Списать</button>
             </div>
           </div>
         </div>
@@ -690,14 +637,10 @@
             <i class="fa-solid fa-trash"></i>
           </div>
           <h3 class="font-display font-bold text-lg text-white">Удалить карту?</h3>
-          <p id="delete-modal-text" class="text-xs text-slate-400">Вы действительно хотите удалить эту карту из базы?</p>
+          <p id="delete-modal-text" class="text-xs text-slate-400">Вы действительно хотите удалить эту карту?</p>
           <div class="flex space-x-3 pt-2">
-            <button onclick="closeDeleteModal()" class="flex-1 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition-colors">
-              Отмена
-            </button>
-            <button onclick="executeDeleteClient()" class="flex-1 py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-semibold shadow-lg shadow-red-600/30 transition-colors">
-              Удалить
-            </button>
+            <button onclick="closeDeleteModal()" class="flex-1 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition-colors">Отмена</button>
+            <button onclick="executeDeleteClient()" class="flex-1 py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-semibold shadow-lg shadow-red-600/30 transition-colors">Удалить</button>
           </div>
         </div>
       </div>
@@ -707,28 +650,18 @@
           <button onclick="closeChangePasswordModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white text-lg p-2">
             <i class="fa-solid fa-xmark"></i>
           </button>
-          
           <h3 class="font-display font-bold text-2xl text-white mb-1">Смена пароля организации</h3>
-          <p class="text-xs text-slate-400 mb-4">Введите текущий пароль и новый пароль для текущего кабинета</p>
-
           <form onsubmit="handlePasswordChange(event)" class="space-y-4">
             <div>
               <label class="text-xs font-semibold text-slate-300 mb-1.5 block">Текущий пароль</label>
               <input type="password" id="cp-current" required placeholder="Введите старый пароль" class="w-full glass-input px-3 py-3 text-xs text-white rounded-xl focus:outline-none">
             </div>
-
             <div>
               <label class="text-xs font-semibold text-slate-300 mb-1.5 block">Новый пароль</label>
               <input type="password" id="cp-new" required placeholder="Введите новый пароль" class="w-full glass-input px-3 py-3 text-xs text-white rounded-xl focus:outline-none">
             </div>
-
-            <div id="cp-error" class="hidden text-xs text-red-400 text-center font-medium bg-red-500/10 py-2.5 rounded-xl border border-red-500/20">
-              Неверный текущий пароль
-            </div>
-
-            <button type="submit" class="w-full bg-gradient-to-r from-brand-500 to-brand-700 hover:from-brand-400 hover:to-brand-600 text-white py-3.5 rounded-xl font-bold text-sm shadow-lg shadow-brand-700/30 transition-all">
-              Сохранить новый пароль
-            </button>
+            <div id="cp-error" class="hidden text-xs text-red-400 text-center font-medium bg-red-500/10 py-2.5 rounded-xl border border-red-500/20">Неверный текущий пароль</div>
+            <button type="submit" class="w-full bg-gradient-to-r from-brand-500 to-brand-700 hover:from-brand-400 hover:to-brand-600 text-white py-3.5 rounded-xl font-bold text-sm shadow-lg shadow-brand-700/30 transition-all">Сохранить новый пароль</button>
           </form>
         </div>
       </div>
@@ -748,11 +681,8 @@
       let isRegisterMode = false;
       let unsubscribeClients = null;
 
-      window.initAppAfterAuth = function() {
-        // App is ready
-      };
+      window.initAppAfterAuth = function() {};
 
-      // Hybrid cloud + local storage accounts manager
       async function getAccountsFromCloud() {
         let cloudAccounts = {};
         try {
@@ -766,36 +696,29 @@
             }
           }
         } catch(e) {
-          console.warn("Cloud accounts read warning, using local fallback:", e);
+          console.warn("Cloud accounts read warning:", e);
         }
-
         const localAccounts = JSON.parse(localStorage.getItem('cozis_accounts') || '{"Test":{"pass":"test"},"Sash":{"pass":"Sash"}}');
         return { ...localAccounts, ...cloudAccounts };
       }
 
       async function saveAccountToCloud(orgName, pass) {
-        // Save locally first for guaranteed persistence
         let localAccounts = JSON.parse(localStorage.getItem('cozis_accounts') || '{"Test":{"pass":"test"},"Sash":{"pass":"Sash"}}');
         localAccounts[orgName] = { pass };
         localStorage.setItem('cozis_accounts', JSON.stringify(localAccounts));
 
-        // Try saving to cloud if available
         try {
           if (window.db && window.fsSetDoc && window.fsDoc && window.auth) {
-            if (!window.auth.currentUser) {
-              await signInAnonymously(window.auth);
-            }
+            if (!window.auth.currentUser) await signInAnonymously(window.auth);
             await window.fsSetDoc(window.fsDoc(window.db, 'artifacts', window.appId, 'public', 'data', 'accounts', orgName), { pass: pass });
           }
         } catch(e) {
-          console.warn("Cloud account save warning (saved locally):", e);
+          console.warn("Cloud account save warning:", e);
         }
       }
 
       function subscribeClientsForOrg(orgName) {
         const storageKey = `cozis_clients_${orgName.toLowerCase()}`;
-        
-        // Load local storage data immediately
         const localData = JSON.parse(localStorage.getItem(storageKey) || '[]');
         if (localData.length > 0) {
           clients = localData;
@@ -805,12 +728,6 @@
             { uid: '04:88:9C:12', nametag: '@magnit_user', visits: 8, bonuses: 240, lastVisit: 'Вчера, 18:05' }
           ];
           localStorage.setItem(storageKey, JSON.stringify(clients));
-        } else if (orgName.toLowerCase() === 'sash') {
-          clients = [
-            { uid: '04:FF:11:AA', nametag: '@sash_vip', visits: 25, bonuses: 990, lastVisit: 'Сегодня, 11:00' },
-            { uid: '04:CC:22:BB', nametag: '@coffee_lover', visits: 5, bonuses: 150, lastVisit: 'Вчера, 15:30' }
-          ];
-          localStorage.setItem(storageKey, JSON.stringify(clients));
         } else {
           clients = [];
         }
@@ -818,7 +735,6 @@
         renderQuickCards();
         updateGlobalStats();
 
-        // Try syncing with Firestore snapshot if available
         if (window.db && window.fsCollection && window.fsOnSnapshot) {
           if (unsubscribeClients) unsubscribeClients();
           const colName = `org_${orgName.toLowerCase()}_clients`;
@@ -856,12 +772,9 @@
         localStorage.setItem(storageKey, JSON.stringify(localData));
         clients = localData;
 
-        // Try syncing to cloud
         try {
           if (window.db && window.fsSetDoc && window.fsDoc) {
-            if (!window.auth.currentUser) {
-              await signInAnonymously(window.auth);
-            }
+            if (!window.auth.currentUser) await signInAnonymously(window.auth);
             const colName = `org_${orgName.toLowerCase()}_clients`;
             const docId = clientObj.uid.replace(/[:\/]/g, '_');
             await window.fsSetDoc(window.fsDoc(window.db, 'artifacts', window.appId, 'public', 'data', colName, docId), clientObj);
@@ -885,9 +798,7 @@
 
         try {
           if (window.db && window.fsDeleteDoc && window.fsDoc) {
-            if (!window.auth.currentUser) {
-              await signInAnonymously(window.auth);
-            }
+            if (!window.auth.currentUser) await signInAnonymously(window.auth);
             const colName = `org_${orgName.toLowerCase()}_clients`;
             const docId = uid.replace(/[:\/]/g, '_');
             await window.fsDeleteDoc(window.fsDoc(window.db, 'artifacts', window.appId, 'public', 'data', colName, docId));
@@ -903,8 +814,7 @@
         const btnText = document.getElementById('auth-btn-text');
         const switchBtn = document.getElementById('auth-switch-btn');
         const masterContainer = document.getElementById('master-code-container');
-        const errBox = document.getElementById('login-error');
-        errBox.classList.add('hidden');
+        document.getElementById('login-error').classList.add('hidden');
 
         if (isRegisterMode) {
           subtitle.innerText = 'Создание новой организации в системе Cozis';
@@ -935,22 +845,9 @@
             return;
           }
 
-          let existingKey = null;
-          for (let org in accounts) {
-            if (org.toLowerCase() === rawUser.toLowerCase()) {
-              existingKey = org;
-              break;
-            }
-          }
-
+          let existingKey = Object.keys(accounts).find(org => org.toLowerCase() === rawUser.toLowerCase());
           if (existingKey) {
             errBox.innerText = 'Организация с таким логином уже существует';
-            errBox.classList.remove('hidden');
-            return;
-          }
-
-          if (rawUser.length < 2) {
-            errBox.innerText = 'Логин должен содержать минимум 2 символа';
             errBox.classList.remove('hidden');
             return;
           }
@@ -962,21 +859,14 @@
             triggerWelcomeAnimation(currentOrg, `Организация "${currentOrg}" успешно зарегистрирована!`);
           });
         } else {
-          let matchedOrgKey = null;
-          for (let org in accounts) {
-            if (org.toLowerCase() === rawUser.toLowerCase()) {
-              matchedOrgKey = org;
-              break;
-            }
-          }
-
+          let matchedOrgKey = Object.keys(accounts).find(org => org.toLowerCase() === rawUser.toLowerCase());
           const orgData = matchedOrgKey ? accounts[matchedOrgKey] : null;
 
           if (orgData && (p === orgData.pass || p === MASTER_RESET_CODE)) {
             document.getElementById('login-overlay').classList.add('hidden');
             showLoadingAnimation(`Вход в кабинет "${matchedOrgKey}"...`, async () => {
               currentOrg = matchedOrgKey;
-              triggerWelcomeAnimation(currentOrg, `Добро пожаловать в кабинет организации "${currentOrg}"!`);
+              triggerWelcomeAnimation(currentOrg, `Добро пожаловать в кабинет "${currentOrg}"!`);
             });
           } else {
             errBox.innerText = 'Неверный логин или пароль';
@@ -988,41 +878,34 @@
       function showLoadingAnimation(text, callback) {
         const loadingOverlay = document.getElementById('loading-overlay');
         document.getElementById('loading-title').innerText = text;
-        
         loadingOverlay.classList.remove('hidden');
-        setTimeout(() => {
-          loadingOverlay.classList.remove('opacity-0');
-        }, 30);
+        setTimeout(() => loadingOverlay.classList.remove('opacity-0'), 30);
 
-        setTimeout(async () => {
+        setTimeout(() => {
           loadingOverlay.classList.add('opacity-0');
-          setTimeout(async () => {
+          setTimeout(() => {
             loadingOverlay.classList.add('hidden');
-            if (callback) await callback();
+            if (callback) callback();
           }, 300);
         }, 1200);
       }
 
       function triggerWelcomeAnimation(orgName, toastMsg) {
         document.getElementById('welcome-org-name').innerText = orgName;
-        
         const overlay = document.getElementById('welcome-modal-overlay');
         const card = document.getElementById('welcome-modal-card');
-        
         overlay.classList.remove('hidden');
         setTimeout(() => {
           overlay.classList.remove('opacity-0');
           card.classList.remove('scale-90');
           card.classList.add('scale-100');
         }, 30);
-
         showToast(toastMsg, 'success');
       }
 
       window.closeWelcomeModalAndEnter = function() {
         const overlay = document.getElementById('welcome-modal-overlay');
         const card = document.getElementById('welcome-modal-card');
-        
         overlay.classList.add('opacity-0');
         card.classList.remove('scale-100');
         card.classList.add('scale-90');
@@ -1031,7 +914,6 @@
           overlay.classList.add('hidden');
           document.getElementById('current-org-badge').innerText = currentOrg;
           document.getElementById('app').classList.remove('hidden');
-
           subscribeClientsForOrg(currentOrg);
         }, 400);
       };
@@ -1045,7 +927,7 @@
         document.getElementById('login-user').value = '';
         document.getElementById('login-pass').value = '';
         document.getElementById('login-error').classList.add('hidden');
-        showToast('Выход из личного кабинета выполнен', 'info');
+        showToast('Выход выполнен', 'info');
       };
 
       window.switchTab = function(tabName) {
@@ -1053,41 +935,17 @@
         const clientsTab = document.getElementById('tab-content-clients');
         const statsTab = document.getElementById('tab-content-stats');
 
-        const navPos = document.getElementById('nav-pos');
-        const navClients = document.getElementById('nav-clients');
-        const navStats = document.getElementById('nav-stats');
-
-        const mobNavPos = document.getElementById('mob-nav-pos');
-        const mobNavClients = document.getElementById('mob-nav-clients');
-        const mobNavStats = document.getElementById('mob-nav-stats');
-
-        if (!posTab || !clientsTab || !statsTab) return;
-
         posTab.classList.add('hidden');
         clientsTab.classList.add('hidden');
         statsTab.classList.add('hidden');
 
-        if (navPos) navPos.className = 'px-4 py-2 rounded-lg text-sm font-medium transition-all text-slate-400 hover:text-white flex items-center space-x-2';
-        if (navClients) navClients.className = 'px-4 py-2 rounded-lg text-sm font-medium transition-all text-slate-400 hover:text-white flex items-center space-x-2';
-        if (navStats) navStats.className = 'px-4 py-2 rounded-lg text-sm font-medium transition-all text-slate-400 hover:text-white flex items-center space-x-2';
-
-        if (mobNavPos) mobNavPos.className = 'flex flex-col items-center space-y-1 text-slate-400 hover:text-white py-1 px-3';
-        if (mobNavClients) mobNavClients.className = 'flex flex-col items-center space-y-1 text-slate-400 hover:text-white py-1 px-3';
-        if (mobNavStats) mobNavStats.className = 'flex flex-col items-center space-y-1 text-slate-400 hover:text-white py-1 px-3';
-
-        if (tabName === 'pos') {
-          posTab.classList.remove('hidden');
-          if (navPos) navPos.className = 'px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center space-x-2 bg-brand-600 text-white shadow-md';
-          if (mobNavPos) mobNavPos.className = 'flex flex-col items-center space-y-1 text-brand-400 py-1 px-3';
-        } else if (tabName === 'clients') {
+        if (tabName === 'pos') posTab.classList.remove('hidden');
+        if (tabName === 'clients') {
           clientsTab.classList.remove('hidden');
-          if (navClients) navClients.className = 'px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center space-x-2 bg-brand-600 text-white shadow-md';
-          if (mobNavClients) mobNavClients.className = 'flex flex-col items-center space-y-1 text-brand-400 py-1 px-3';
           renderClientsTable();
-        } else if (tabName === 'stats') {
+        }
+        if (tabName === 'stats') {
           statsTab.classList.remove('hidden');
-          if (navStats) navStats.className = 'px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center space-x-2 bg-brand-600 text-white shadow-md';
-          if (mobNavStats) mobNavStats.className = 'flex flex-col items-center space-y-1 text-brand-400 py-1 px-3';
           updateGlobalStats();
         }
       };
@@ -1107,17 +965,15 @@
         event.preventDefault();
         const currentInput = document.getElementById('cp-current').value;
         const newInput = document.getElementById('cp-new').value;
-        const errBox = document.getElementById('cp-error');
-
         const accounts = await getAccountsFromCloud();
         const orgData = accounts[currentOrg];
 
         if (orgData && (currentInput === orgData.pass || currentInput === MASTER_RESET_CODE)) {
           await saveAccountToCloud(currentOrg, newInput);
           closeChangePasswordModal();
-          showToast('Пароль организации успешно изменен!', 'success');
+          showToast('Пароль успешно изменен!', 'success');
         } else {
-          errBox.classList.remove('hidden');
+          document.getElementById('cp-error').classList.remove('hidden');
         }
       };
 
@@ -1125,7 +981,6 @@
         const container = document.getElementById('quick-cards-list');
         if (!container) return;
         container.innerHTML = '';
-
         clients.slice(0, 4).forEach(c => {
           const btn = document.createElement('button');
           btn.className = 'px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-brand-500/50 text-xs text-slate-300 hover:text-white transition-all flex items-center space-x-1.5';
@@ -1133,9 +988,7 @@
           btn.onclick = () => simulateCardScanByUID(c.uid);
           container.appendChild(btn);
         });
-
-        const countEl = document.getElementById('tab-client-count');
-        if (countEl) countEl.innerText = clients.length;
+        document.getElementById('tab-client-count').innerText = clients.length;
       }
       window.renderQuickCards = renderQuickCards;
 
@@ -1153,8 +1006,7 @@
           try {
             const ndef = new NDEFReader();
             await ndef.scan();
-            showToast('Приложите NFC-карту (Магнит / NTAG215) к задней панели смартфона...', 'info');
-            
+            showToast('Приложите NFC-карту к задней панели смартфона...', 'info');
             ndef.onreading = event => {
               const serialNumber = event.serialNumber ? event.serialNumber.replace(/:/g, ':').toUpperCase() : '04:77:88:99';
               const regModal = document.getElementById('register-modal');
@@ -1167,12 +1019,11 @@
               }
             };
           } catch (error) {
-            console.error("Web NFC error:", error);
-            showToast('Ошибка Web NFC: разрешите доступ к NFC в браузере', 'warning');
+            showToast('Ошибка Web NFC: разрешите доступ', 'warning');
             triggerSimulatedScan();
           }
         } else {
-          showToast('Web NFC не поддерживается в этом браузере. Используется симуляция.', 'info');
+          showToast('Web NFC не поддерживается в этом браузере', 'info');
           triggerSimulatedScan();
         }
       };
@@ -1180,7 +1031,7 @@
       window.simulateCardScanByUID = function(uid) {
         const found = clients.find(c => c.uid.toLowerCase() === uid.toLowerCase());
         if (!found) {
-          showToast('Карта не найдена в базе этой организации. Создайте её!', 'warning');
+          showToast('Карта не найдена. Создайте её!', 'warning');
           openRegisterModal(uid);
           return;
         }
@@ -1195,16 +1046,10 @@
         document.getElementById('res-visit-count').innerText = found.visits;
         document.getElementById('res-bonus-balance').innerText = found.bonuses;
         document.getElementById('res-last-visit').innerText = found.lastVisit || 'Только что';
-
-        showToast(`Карта ${found.nametag} успешно считана!`, 'success');
+        showToast(`Карта ${found.nametag} считана!`, 'success');
       };
 
-      window.handleManualUIDEnter = function(e) {
-        if (e.key === 'Enter') {
-          submitManualUID();
-        }
-      };
-
+      window.handleManualUIDEnter = function(e) { if (e.key === 'Enter') submitManualUID(); };
       window.submitManualUID = function() {
         const input = document.getElementById('manual-uid-input');
         const uid = input.value.trim();
@@ -1224,7 +1069,6 @@
         activeScannedClient.visits += 1;
         activeScannedClient.bonuses += 30;
         activeScannedClient.lastVisit = 'Сегодня, ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        
         saveClientToCloud(currentOrg, activeScannedClient);
         simulateCardScanByUID(activeScannedClient.uid);
         showToast('Визит засчитан (+30 бонусов)!', 'success');
@@ -1235,23 +1079,15 @@
         document.getElementById('redeem-amount-input').value = Math.min(100, activeScannedClient.bonuses);
         document.getElementById('redeem-modal').classList.remove('hidden');
       };
-
-      window.closeRedeemModal = function() {
-        document.getElementById('redeem-modal').classList.add('hidden');
-      };
+      window.closeRedeemModal = function() { document.getElementById('redeem-modal').classList.add('hidden'); };
 
       window.executeRedeemBonus = function() {
         if (!activeScannedClient) return;
         const amount = parseInt(document.getElementById('redeem-amount-input').value) || 0;
-        if (amount <= 0) {
-          showToast('Укажите корректную сумму', 'warning');
+        if (amount <=0 || activeScannedClient.bonuses < amount) {
+          showToast('Недостаточно бонусов или неверная сумма', 'error');
           return;
         }
-        if (activeScannedClient.bonuses < amount) {
-          showToast('У клиента недостаточно бонусов!', 'error');
-          return;
-        }
-
         activeScannedClient.bonuses -= amount;
         saveClientToCloud(currentOrg, activeScannedClient);
         closeRedeemModal();
@@ -1265,15 +1101,11 @@
         document.getElementById('reg-nametag').value = '';
         updateLiveCardPreview();
       };
-
-      window.closeRegisterModal = function() {
-        document.getElementById('register-modal').classList.add('hidden');
-      };
+      window.closeRegisterModal = function() { document.getElementById('register-modal').classList.add('hidden'); };
 
       window.generateRandomUID = function() {
         const hex = () => Math.floor(Math.random() * 256).toString(16).padStart(2, '0').toUpperCase();
-        const randomUID = `04:${hex()}:${hex()}:${hex()}`;
-        document.getElementById('reg-uid').value = randomUID;
+        document.getElementById('reg-uid').value = `04:${hex()}:${hex()}:${hex()}`;
         updateLiveCardPreview();
       };
 
@@ -1281,21 +1113,18 @@
         let nametag = document.getElementById('reg-nametag').value.trim() || '@nametag';
         if (!nametag.startsWith('@')) nametag = '@' + nametag;
         const uid = document.getElementById('reg-uid').value.trim() || '04:XX:XX:XX';
-
         document.getElementById('prev-card-nametag').innerText = nametag;
         document.getElementById('prev-card-uid').innerText = uid;
       };
 
       window.handleRegisterSubmit = function(event) {
         event.preventDefault();
-        
         const uid = document.getElementById('reg-uid').value.trim();
         let nametag = document.getElementById('reg-nametag').value.trim();
         if (!nametag.startsWith('@')) nametag = '@' + nametag;
         const bonus = parseInt(document.getElementById('reg-bonus').value) || 0;
 
         const existing = clients.find(c => c.uid.toLowerCase() === uid.toLowerCase());
-        
         const newClient = {
           uid,
           nametag,
@@ -1304,44 +1133,23 @@
           lastVisit: 'Только что'
         };
 
-        const idx = clients.findIndex(c => c.uid.toLowerCase() === uid.toLowerCase());
-        if (idx >= 0) {
-          clients[idx] = newClient;
-        } else {
-          clients.unshift(newClient);
-        }
-
         saveClientToCloud(currentOrg, newClient);
         renderQuickCards();
         closeRegisterModal();
-        
         simulateCardScanByUID(uid);
         switchTab('pos');
-        showToast(`Карта ${nametag} успешно активирована!`, 'success');
+        showToast(`Карта ${nametag} активирована!`, 'success');
       };
 
       function renderClientsTable() {
         const tbody = document.getElementById('clients-table-body');
         if (!tbody) return;
-        
-        const searchEl = document.getElementById('client-search-input');
-        const searchQuery = searchEl ? searchEl.value.toLowerCase() : '';
-
+        const searchQuery = (document.getElementById('client-search-input')?.value || '').toLowerCase();
         tbody.innerHTML = '';
 
-        const filtered = clients.filter(c => {
-          return c.nametag.toLowerCase().includes(searchQuery) ||
-                 c.uid.toLowerCase().includes(searchQuery);
-        });
-
+        const filtered = clients.filter(c => c.nametag.toLowerCase().includes(searchQuery) || c.uid.toLowerCase().includes(searchQuery));
         if (filtered.length === 0) {
-          tbody.innerHTML = `
-            <tr>
-              <td colspan="6" class="px-6 py-8 text-center text-slate-500">
-                Карты не найдены в этой организации
-              </td>
-            </tr>
-          `;
+          tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-slate-500">Карты не найдены</td></tr>`;
           return;
         }
 
@@ -1350,9 +1158,7 @@
           tr.className = 'hover:bg-slate-900/50 transition-colors';
           tr.innerHTML = `
             <td class="px-6 py-4 font-semibold text-white flex items-center space-x-3">
-              <div class="w-8 h-8 rounded-lg bg-brand-600/30 text-brand-300 flex items-center justify-center font-bold text-xs shrink-0">
-                ${client.nametag[1] ? client.nametag[1].toUpperCase() : '@'}
-              </div>
+              <div class="w-8 h-8 rounded-lg bg-brand-600/30 text-brand-300 flex items-center justify-center font-bold text-xs shrink-0">${client.nametag[1] ? client.nametag[1].toUpperCase() : '@'}</div>
               <span class="text-brand-300 font-display">${client.nametag}</span>
             </td>
             <td class="px-6 py-4 font-mono text-xs text-slate-300">${client.uid}</td>
@@ -1360,12 +1166,8 @@
             <td class="px-6 py-4 text-purple-400 font-semibold">${client.bonuses} Б</td>
             <td class="px-6 py-4 text-slate-400 text-xs">${client.lastVisit || '—'}</td>
             <td class="px-6 py-4 text-right space-x-2">
-              <button onclick="simulateCardScanByUID('${client.uid}'); switchTab('pos');" class="px-2.5 py-1.5 rounded-lg bg-brand-600/20 hover:bg-brand-600 text-brand-300 hover:text-white text-xs transition-colors">
-                Выбрать
-              </button>
-              <button onclick="requestDeleteClient('${client.uid}')" class="px-2.5 py-1.5 text-slate-500 hover:text-red-400 text-xs transition-colors">
-                <i class="fa-solid fa-trash"></i>
-              </button>
+              <button onclick="simulateCardScanByUID('${client.uid}'); switchTab('pos');" class="px-2.5 py-1.5 rounded-lg bg-brand-600/20 hover:bg-brand-600 text-brand-300 hover:text-white text-xs transition-colors">Выбрать</button>
+              <button onclick="requestDeleteClient('${client.uid}')" class="px-2.5 py-1.5 text-slate-500 hover:text-red-400 text-xs transition-colors"><i class="fa-solid fa-trash"></i></button>
             </td>
           `;
           tbody.appendChild(tr);
@@ -1375,18 +1177,9 @@
 
       window.requestDeleteClient = function(uid) {
         targetUidToDelete = uid;
-        const client = clients.find(c => c.uid === uid);
-        if (client) {
-          document.getElementById('delete-modal-text').innerText = `Удалить карту ${client.nametag} (${client.uid})?`;
-        }
         document.getElementById('delete-modal').classList.remove('hidden');
       };
-
-      window.closeDeleteModal = function() {
-        targetUidToDelete = null;
-        document.getElementById('delete-modal').classList.add('hidden');
-      };
-
+      window.closeDeleteModal = function() { document.getElementById('delete-modal').classList.add('hidden'); };
       window.executeDeleteClient = function() {
         if (!targetUidToDelete) return;
         deleteClientFromCloud(currentOrg, targetUidToDelete);
@@ -1399,25 +1192,14 @@
         const totalVisits = clients.reduce((acc, c) => acc + c.visits, 0);
         const totalBonuses = clients.reduce((acc, c) => acc + c.bonuses, 0);
 
-        const sCards = document.getElementById('stat-total-cards');
-        const sVisits = document.getElementById('stat-total-visits');
-        const sScansToday = document.getElementById('stat-scans-today');
-        const sRewards = document.getElementById('stat-rewards-given');
-
-        if (sCards) sCards.innerText = totalCards;
-        if (sVisits) sVisits.innerText = totalVisits;
-        if (sScansToday) sScansToday.innerText = Math.round(totalVisits * 0.45) + 2;
-        if (sRewards) sRewards.innerText = Math.round(totalBonuses / 25);
-
-        const s30 = document.getElementById('stat-30days');
-        const sAvg = document.getElementById('stat-avg-visits');
-        const sRetention = document.getElementById('stat-retention');
-        const sRewardsTotal = document.getElementById('stat-rewards-total');
-
-        if (s30) s30.innerText = totalVisits * 2;
-        if (sAvg) sAvg.innerText = totalCards > 0 ? (totalVisits / totalCards).toFixed(1) : '0.0';
-        if (sRetention) sRetention.innerText = totalCards > 0 ? '99.1%' : '0%';
-        if (sRewardsTotal) sRewardsTotal.innerText = Math.round(totalBonuses / 20);
+        document.getElementById('stat-total-cards').innerText = totalCards;
+        document.getElementById('stat-total-visits').innerText = totalVisits;
+        document.getElementById('stat-scans-today').innerText = Math.round(totalVisits * 0.45) + 2;
+        document.getElementById('stat-rewards-given').innerText = Math.round(totalBonuses / 25);
+        document.getElementById('stat-30days').innerText = totalVisits * 2;
+        document.getElementById('stat-avg-visits').innerText = totalCards > 0 ? (totalVisits / totalCards).toFixed(1) : '0.0';
+        document.getElementById('stat-retention').innerText = totalCards > 0 ? '99.1%' : '0%';
+        document.getElementById('stat-rewards-total').innerText = Math.round(totalBonuses / 20);
 
         renderStatsChart(totalVisits);
         renderLeaderboard();
@@ -1426,38 +1208,22 @@
 
       function renderStatsChart(totalVisits) {
         const container = document.getElementById('stats-chart-container');
-        const badge = document.getElementById('stat-total-scans-badge');
-        const peakInfo = document.getElementById('stats-chart-peak-info');
         if (!container) return;
-
         container.innerHTML = '';
-        if (badge) badge.innerText = `Всего: ${totalVisits} визитов`;
+        document.getElementById('stat-total-scans-badge').innerText = `Всего: ${totalVisits} визитов`;
 
         const days = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
         const weights = [0.12, 0.14, 0.15, 0.13, 0.18, 0.22, 0.10];
-        
-        let maxVal = 0;
-        let peakDay = 'Пт';
-
-        days.forEach((day, i) => {
-          const val = Math.max(1, Math.round(totalVisits * weights[i]));
-          if (val > maxVal) {
-            maxVal = val;
-            peakDay = day;
-          }
-        });
-
-        if (peakInfo) peakInfo.innerText = `Пик визитов: ${peakDay} (${maxVal} считываний)`;
+        let maxVal = Math.max(...weights.map(w => Math.round(totalVisits * w))) || 10;
 
         days.forEach((day, i) => {
           const val = Math.max(4, Math.round((totalVisits || 10) * weights[i]));
-          const heightPct = Math.min(100, Math.max(15, Math.round((val / (maxVal || 10)) * 100)));
-
+          const heightPct = Math.min(100, Math.max(15, Math.round((val / maxVal) * 100)));
           const col = document.createElement('div');
           col.className = 'flex-1 flex flex-col items-center h-full justify-end group';
           col.innerHTML = `
             <div class="text-[10px] text-brand-300 opacity-0 group-hover:opacity-100 transition-opacity mb-1 font-mono">${val}</div>
-            <div style="height: ${heightPct}%" class="w-full max-w-[32px] bg-gradient-to-t from-brand-700 to-brand-500 rounded-t-xl transition-all group-hover:brightness-125 shadow-lg shadow-brand-600/20"></div>
+            <div style="height: ${heightPct}%" class="w-full max-w-[32px] bg-gradient-to-t from-brand-700 to-brand-500 rounded-t-xl transition-all shadow-lg"></div>
             <span class="text-[11px] text-slate-400 mt-2 font-medium">${day}</span>
           `;
           container.appendChild(col);
@@ -1469,22 +1235,17 @@
         const lb = document.getElementById('stats-leaderboard');
         if (!lb) return;
         lb.innerHTML = '';
-
         const sorted = [...clients].sort((a,b) => b.visits - a.visits).slice(0, 3);
         if (sorted.length === 0) {
           lb.innerHTML = '<p class="text-xs text-slate-500">Нет данных</p>';
           return;
         }
-
         sorted.forEach((c, idx) => {
-          const medals = ['text-amber-400', 'text-slate-300', 'text-amber-600'];
           const row = document.createElement('div');
           row.className = 'flex items-center justify-between p-3 rounded-2xl bg-slate-900/60 border border-slate-800';
           row.innerHTML = `
             <div class="flex items-center space-x-3">
-              <span class="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-xs font-bold font-display ${medals[idx] || 'text-slate-400'}">
-                ${idx + 1}
-              </span>
+              <span class="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-xs font-bold font-display text-amber-400">${idx + 1}</span>
               <span class="font-display font-semibold text-sm text-white">${c.nametag}</span>
             </div>
             <span class="text-xs font-bold text-purple-400 bg-purple-500/10 px-2.5 py-1 rounded-xl border border-purple-500/20">${c.visits} визитов</span>
@@ -1498,31 +1259,22 @@
         const container = document.getElementById('toast-container');
         if (!container) return;
         const toast = document.createElement('div');
-
         const colors = {
           success: 'bg-purple-900/90 border-purple-500 text-purple-100',
           warning: 'bg-amber-900/90 border-amber-500 text-amber-100',
           error: 'bg-red-900/90 border-red-500 text-red-100',
           info: 'bg-brand-900/90 border-brand-500 text-brand-100'
         };
-
-        toast.className = `pointer-events-auto px-4 py-3 rounded-2xl border ${colors[type] || colors.info} text-xs font-medium shadow-xl flex items-center space-x-2 animate-fade-in`;
+        toast.className = `pointer-events-auto px-4 py-3 rounded-2xl border ${colors[type] || colors.info} text-xs font-medium shadow-xl flex items-center space-x-2`;
         toast.innerHTML = `<i class="fa-solid fa-circle-check"></i><span>${message}</span>`;
-
         container.appendChild(toast);
-
-        setTimeout(() => {
-          toast.remove();
-        }, 3000);
+        setTimeout(() => toast.remove(), 3000);
       }
       window.showToast = showToast;
 
       function exportCSV() {
         let csv = `UID,Nametag,Visits,Bonuses (Org: ${currentOrg})\n`;
-        clients.forEach(c => {
-          csv += `"${c.uid}","${c.nametag}",${c.visits},${c.bonuses}\n`;
-        });
-        
+        clients.forEach(c => { csv += `"${c.uid}","${c.nametag}",${c.visits},${c.bonuses}\n`; });
         const blob = new Blob([csv], { type: 'text/csv' });
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
