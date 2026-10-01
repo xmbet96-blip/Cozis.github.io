@@ -69,7 +69,6 @@
       box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
     }
     
-    /* Темный металл и минимализм для карт */
     .metal-card {
       border: 1px solid rgba(255, 255, 255, 0.12);
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.15);
@@ -107,7 +106,6 @@
       animation: spin-slow 2s linear infinite;
     }
 
-    /* Анимации 3D иконок на фоне */
     @keyframes float-3d-1 {
       0%, 100% { transform: translateY(0px) rotateX(0deg) rotateY(0deg) scale(1); }
       50% { transform: translateY(-20px) rotateX(15deg) rotateY(15deg) scale(1.05); }
@@ -179,7 +177,6 @@
     <!-- Блок авторизации/регистрации -->
     <div id="login-overlay" class="fixed inset-0 z-50 bg-[#0b0f19] flex items-center justify-center p-4 overflow-hidden">
       
-      <!-- Фоновые анимированные 3D иконки -->
       <div class="absolute inset-0 pointer-events-none overflow-hidden">
         <div class="absolute top-[12%] left-[10%] sm:left-[18%] w-20 h-20 rounded-3xl bg-gradient-to-tr from-brand-600/20 to-purple-500/20 border border-brand-500/30 backdrop-blur-xl flex items-center justify-center text-brand-400 text-3xl shadow-2xl animate-float-3d-1">
           <i class="fa-solid fa-id-card"></i>
@@ -327,6 +324,10 @@
             <i class="fa-solid fa-chart-line"></i>
             <span>Статистика</span>
           </button>
+          <button id="nav-settings" onclick="switchTab('settings')" class="px-4 py-2 rounded-lg text-sm font-medium transition-all text-slate-400 hover:text-white flex items-center space-x-2">
+            <i class="fa-solid fa-gear"></i>
+            <span>Настройки</span>
+          </button>
         </nav>
 
         <div class="flex items-center space-x-2 sm:space-x-3">
@@ -348,18 +349,22 @@
       </header>
 
       <!-- Нижняя навигация для мобильных -->
-      <div class="md:hidden fixed bottom-0 left-0 right-0 z-40 glass-panel border-t border-slate-800 px-4 py-2 flex justify-around items-center bg-slate-950/95">
-        <button id="mob-nav-pos" onclick="switchTab('pos')" class="flex flex-col items-center space-y-1 text-brand-400 py-1 px-3">
-          <i class="fa-solid fa-id-card text-lg"></i>
-          <span class="text-[10px] font-medium">Терминал</span>
+      <div class="md:hidden fixed bottom-0 left-0 right-0 z-40 glass-panel border-t border-slate-800 px-2 py-2 flex justify-around items-center bg-slate-950/95">
+        <button id="mob-nav-pos" onclick="switchTab('pos')" class="flex flex-col items-center space-y-1 text-brand-400 py-1 px-2">
+          <i class="fa-solid fa-id-card text-base"></i>
+          <span class="text-[9px] font-medium">Терминал</span>
         </button>
-        <button id="mob-nav-clients" onclick="switchTab('clients')" class="flex flex-col items-center space-y-1 text-slate-400 hover:text-white py-1 px-3">
-          <i class="fa-solid fa-wallet text-lg"></i>
-          <span class="text-[10px] font-medium">Карты</span>
+        <button id="mob-nav-clients" onclick="switchTab('clients')" class="flex flex-col items-center space-y-1 text-slate-400 hover:text-white py-1 px-2">
+          <i class="fa-solid fa-wallet text-base"></i>
+          <span class="text-[9px] font-medium">Карты</span>
         </button>
-        <button id="mob-nav-stats" onclick="switchTab('stats')" class="flex flex-col items-center space-y-1 text-slate-400 hover:text-white py-1 px-3">
-          <i class="fa-solid fa-chart-line text-lg"></i>
-          <span class="text-[10px] font-medium">Статистика</span>
+        <button id="mob-nav-stats" onclick="switchTab('stats')" class="flex flex-col items-center space-y-1 text-slate-400 hover:text-white py-1 px-2">
+          <i class="fa-solid fa-chart-line text-base"></i>
+          <span class="text-[9px] font-medium">Статистика</span>
+        </button>
+        <button id="mob-nav-settings" onclick="switchTab('settings')" class="flex flex-col items-center space-y-1 text-slate-400 hover:text-white py-1 px-2">
+          <i class="fa-solid fa-gear text-base"></i>
+          <span class="text-[9px] font-medium">Настройки</span>
         </button>
       </div>
 
@@ -500,6 +505,20 @@
                   </div>
                 </div>
 
+                <!-- Шкала исчисления визитов "до приза" -->
+                <div id="prize-progress-widget" class="glass-card p-4 rounded-2xl relative overflow-hidden space-y-2">
+                  <div class="flex justify-between items-center text-xs">
+                    <span class="font-semibold text-slate-300 flex items-center space-x-1.5">
+                      <i class="fa-solid fa-trophy text-amber-400"></i>
+                      <span id="widget-prize-label">До приза (Фирменный десерт):</span>
+                    </span>
+                    <span id="widget-prize-counter" class="font-bold text-brand-300">7 / 10 визитов</span>
+                  </div>
+                  <div class="w-full h-2.5 bg-slate-900 rounded-full overflow-hidden p-0.5 border border-slate-800">
+                    <div id="widget-prize-bar" class="h-full bg-gradient-to-r from-brand-500 to-purple-400 rounded-full transition-all duration-500" style="width: 70%"></div>
+                  </div>
+                </div>
+
                 <div class="space-y-3">
                   <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Действия кассира:</label>
                   <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -527,10 +546,9 @@
           </div>
         </div>
 
-        <!-- ВКЛАДКА: Карты (Премиум-карусель в разных цветах + отдельный инфо-блок) -->
+        <!-- ВКЛАДКА: Карты -->
         <div id="tab-content-clients" class="hidden space-y-6 animate-fade-in">
           
-          <!-- Панель поиска и экспорта -->
           <div class="glass-panel p-4 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-4">
             <div class="relative w-full md:w-96">
               <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-500 text-sm"></i>
@@ -542,7 +560,6 @@
             </button>
           </div>
 
-          <!-- Секция карусели карт -->
           <div class="glass-panel p-6 rounded-3xl space-y-6 relative overflow-hidden">
             <div class="flex items-center justify-between flex-wrap gap-2">
               <div>
@@ -562,13 +579,9 @@
               </div>
             </div>
 
-            <!-- Горизонтальная карусель цветных карт -->
-            <div id="clients-carousel-container" class="flex gap-6 overflow-x-auto pb-4 pt-2 snap-x snap-mandatory scrollbar-none focus:outline-none" style="scrollbar-width: none;">
-              <!-- Динамически заполняется JS -->
-            </div>
+            <div id="clients-carousel-container" class="flex gap-6 overflow-x-auto pb-4 pt-2 snap-x snap-mandatory scrollbar-none focus:outline-none" style="scrollbar-width: none;"></div>
           </div>
 
-          <!-- Отдельный информационный виджет и быстрые действия для выбранной карты -->
           <div id="client-detail-panel" class="glass-panel rounded-3xl p-6 space-y-6 border border-brand-500/30">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-slate-800">
               <div class="flex items-center space-x-3">
@@ -649,6 +662,72 @@
                 <div id="stats-leaderboard" class="space-y-3"></div>
               </div>
             </div>
+          </div>
+        </div>
+
+        <!-- ВКЛАДКА: Настройки организации -->
+        <div id="tab-content-settings" class="hidden space-y-6 animate-fade-in">
+          <div class="glass-panel p-6 sm:p-8 rounded-3xl space-y-6 max-w-2xl mx-auto border border-brand-500/30">
+            <div class="flex items-center space-x-3 pb-4 border-b border-slate-800">
+              <div class="w-12 h-12 rounded-2xl bg-brand-500/20 text-brand-400 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-gear"></i>
+              </div>
+              <div>
+                <h3 class="font-display font-bold text-xl text-white">Настройки организации</h3>
+                <p class="text-xs text-slate-400">Параметры программы лояльности и отображения в терминале</p>
+              </div>
+            </div>
+
+            <form onsubmit="saveOrgSettings(event)" class="space-y-5">
+              <div>
+                <label class="text-xs font-semibold text-slate-300 mb-1.5 block">1. Количество начисления баллов за 1 визит</label>
+                <div class="relative">
+                  <i class="fa-solid fa-coins absolute left-3.5 top-3.5 text-slate-500 text-sm"></i>
+                  <input type="number" id="setting-points-per-visit" min="1" max="1000" value="30" required class="w-full glass-input pl-10 pr-4 py-3 text-sm rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none">
+                </div>
+                <p class="text-[11px] text-slate-500 mt-1">Сколько бонусов начисляется клиенту при сканировании за каждый успешный визит.</p>
+              </div>
+
+              <div class="pt-2 border-t border-slate-800/80 space-y-4">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <span class="text-xs font-semibold text-slate-300 block">2. Шкала исчисления визитов "до приза" на главный экран</span>
+                    <span class="text-[11px] text-slate-500">Отображать прогресс-бар до получения награды на экране терминала</span>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="setting-show-prize-progress" checked class="sr-only peer" onchange="togglePrizeProgressSettingPreview()">
+                    <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-600"></div>
+                  </label>
+                </div>
+
+                <div id="prize-settings-group" class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                  <div>
+                    <label class="text-xs font-semibold text-slate-300 mb-1.5 block">Визитов до приза</label>
+                    <input type="number" id="setting-visits-to-prize" min="1" max="100" value="10" class="w-full glass-input px-4 py-3 text-sm rounded-xl text-slate-100 focus:outline-none">
+                  </div>
+                  <div>
+                    <label class="text-xs font-semibold text-slate-300 mb-1.5 block">Название приза / подарка</label>
+                    <input type="text" id="setting-prize-name" value="Фирменный десерт" class="w-full glass-input px-4 py-3 text-sm rounded-xl text-slate-100 focus:outline-none">
+                  </div>
+                </div>
+              </div>
+
+              <div class="pt-2 border-t border-slate-800/80">
+                <label class="text-xs font-semibold text-slate-300 mb-1.5 block">3. Стартовые бонусы при выдаче новой карты</label>
+                <div class="relative">
+                  <i class="fa-solid fa-gift absolute left-3.5 top-3.5 text-slate-500 text-sm"></i>
+                  <input type="number" id="setting-default-bonus" min="0" max="1000" value="100" required class="w-full glass-input pl-10 pr-4 py-3 text-sm rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none">
+                </div>
+                <p class="text-[11px] text-slate-500 mt-1">Автоматический бонус для новых клиентов при первичной регистрации карты.</p>
+              </div>
+
+              <div class="pt-4">
+                <button type="submit" class="w-full bg-gradient-to-r from-brand-500 to-brand-700 hover:from-brand-400 hover:to-brand-600 text-white py-3.5 rounded-xl font-bold text-sm shadow-lg shadow-brand-700/30 transition-all flex items-center justify-center space-x-2">
+                  <i class="fa-solid fa-floppy-disk"></i>
+                  <span>Сохранить настройки организации</span>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
 
@@ -782,7 +861,91 @@
       let isRegisterMode = false;
       let unsubscribeClients = null;
 
+      let orgSettings = {
+        pointsPerVisit: 30,
+        showPrizeProgress: true,
+        visitsToPrize: 10,
+        prizeName: 'Фирменный десерт',
+        defaultBonus: 100
+      };
+
       window.initAppAfterAuth = function() {};
+
+      function loadOrgSettings(orgName) {
+        const key = `cozis_settings_${orgName.toLowerCase()}`;
+        const saved = localStorage.getItem(key);
+        if (saved) {
+          try {
+            orgSettings = { ...orgSettings, ...JSON.parse(saved) };
+          } catch(e) {}
+        } else {
+          orgSettings = {
+            pointsPerVisit: 30,
+            showPrizeProgress: true,
+            visitsToPrize: 10,
+            prizeName: 'Фирменный десерт',
+            defaultBonus: 100
+          };
+        }
+        
+        if (document.getElementById('setting-points-per-visit')) {
+          document.getElementById('setting-points-per-visit').value = orgSettings.pointsPerVisit;
+          document.getElementById('setting-show-prize-progress').checked = orgSettings.showPrizeProgress;
+          document.getElementById('setting-visits-to-prize').value = orgSettings.visitsToPrize;
+          document.getElementById('setting-prize-name').value = orgSettings.prizeName;
+          document.getElementById('setting-default-bonus').value = orgSettings.defaultBonus;
+          document.getElementById('reg-bonus').value = orgSettings.defaultBonus;
+          togglePrizeProgressSettingPreview();
+        }
+      }
+
+      window.saveOrgSettings = function(event) {
+        event.preventDefault();
+        orgSettings.pointsPerVisit = parseInt(document.getElementById('setting-points-per-visit').value) || 30;
+        orgSettings.showPrizeProgress = document.getElementById('setting-show-prize-progress').checked;
+        orgSettings.visitsToPrize = parseInt(document.getElementById('setting-visits-to-prize').value) || 10;
+        orgSettings.prizeName = document.getElementById('setting-prize-name').value.trim() || 'Приз';
+        orgSettings.defaultBonus = parseInt(document.getElementById('setting-default-bonus').value) || 100;
+        
+        document.getElementById('reg-bonus').value = orgSettings.defaultBonus;
+
+        const key = `cozis_settings_${currentOrg.toLowerCase()}`;
+        localStorage.setItem(key, JSON.stringify(orgSettings));
+
+        showToast('Настройки организации успешно сохранены!', 'success');
+        if (activeScannedClient) {
+          updatePrizeProgressWidget(activeScannedClient);
+        }
+      };
+
+      window.togglePrizeProgressSettingPreview = function() {
+        const checked = document.getElementById('setting-show-prize-progress').checked;
+        const group = document.getElementById('prize-settings-group');
+        if (checked) {
+          group.classList.remove('opacity-50', 'pointer-events-none');
+        } else {
+          group.classList.add('opacity-50', 'pointer-events-none');
+        }
+      };
+
+      function updatePrizeProgressWidget(client) {
+        const widget = document.getElementById('prize-progress-widget');
+        if (!widget) return;
+        if (!orgSettings.showPrizeProgress) {
+          widget.classList.add('hidden');
+          return;
+        }
+        widget.classList.remove('hidden');
+
+        const target = orgSettings.visitsToPrize || 10;
+        const currentVisits = client.visits || 0;
+        const progressInCycle = currentVisits % target;
+        const pct = Math.min(100, Math.round((progressInCycle / target) * 100));
+
+        document.getElementById('widget-prize-label').innerText = `До приза (${orgSettings.prizeName}):`;
+        document.getElementById('widget-prize-counter').innerText = `${progressInCycle} / ${target} визитов (Всего: ${currentVisits})`;
+        document.getElementById('widget-prize-bar').style.width = `${pct}%`;
+      }
 
       async function getAccountsFromCloud() {
         let cloudAccounts = {};
@@ -819,6 +982,7 @@
       }
 
       function subscribeClientsForOrg(orgName) {
+        loadOrgSettings(orgName);
         const storageKey = `cozis_clients_${orgName.toLowerCase()}`;
         const localData = JSON.parse(localStorage.getItem(storageKey) || '[]');
         if (localData.length > 0) {
@@ -1035,10 +1199,12 @@
         const posTab = document.getElementById('tab-content-pos');
         const clientsTab = document.getElementById('tab-content-clients');
         const statsTab = document.getElementById('tab-content-stats');
+        const settingsTab = document.getElementById('tab-content-settings');
 
         posTab.classList.add('hidden');
         clientsTab.classList.add('hidden');
         statsTab.classList.add('hidden');
+        settingsTab.classList.add('hidden');
 
         if (tabName === 'pos') posTab.classList.remove('hidden');
         if (tabName === 'clients') {
@@ -1049,9 +1215,12 @@
           statsTab.classList.remove('hidden');
           updateGlobalStats();
         }
+        if (tabName === 'settings') {
+          settingsTab.classList.remove('hidden');
+          loadOrgSettings(currentOrg);
+        }
 
-        // Подсветка активной кнопки навигации (фиолетовый акцент)
-        ['pos', 'clients', 'stats'].forEach(t => {
+        ['pos', 'clients', 'stats', 'settings'].forEach(t => {
           const btn = document.getElementById(`nav-${t}`);
           const mobBtn = document.getElementById(`mob-nav-${t}`);
           if (btn) {
@@ -1063,9 +1232,9 @@
           }
           if (mobBtn) {
             if (t === tabName) {
-              mobBtn.className = "flex flex-col items-center space-y-1 text-brand-400 py-1 px-3";
+              mobBtn.className = "flex flex-col items-center space-y-1 text-brand-400 py-1 px-2";
             } else {
-              mobBtn.className = "flex flex-col items-center space-y-1 text-slate-400 hover:text-white py-1 px-3";
+              mobBtn.className = "flex flex-col items-center space-y-1 text-slate-400 hover:text-white py-1 px-2";
             }
           }
         });
@@ -1105,7 +1274,15 @@
         clients.slice(0, 4).forEach(c => {
           const btn = document.createElement('button');
           btn.className = 'px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-brand-500/50 text-xs text-slate-300 hover:text-white transition-all flex items-center space-x-1.5';
-          btn.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-brand-500"></span><span class="font-display font-semibold">${c.nametag}</span>`;
+          
+          const dot = document.createElement('span');
+          dot.className = 'w-1.5 h-1.5 rounded-full bg-brand-500';
+          const span = document.createElement('span');
+          span.className = 'font-display font-semibold';
+          span.textContent = c.nametag;
+
+          btn.appendChild(dot);
+          btn.appendChild(span);
           btn.onclick = () => simulateCardScanByUID(c.uid);
           container.appendChild(btn);
         });
@@ -1167,6 +1344,8 @@
         document.getElementById('res-visit-count').innerText = found.visits;
         document.getElementById('res-bonus-balance').innerText = found.bonuses;
         document.getElementById('res-last-visit').innerText = found.lastVisit || 'Только что';
+        
+        updatePrizeProgressWidget(found);
         showToast(`Карта ${found.nametag} считана!`, 'success');
       };
 
@@ -1187,12 +1366,13 @@
 
       window.actionAddVisit = function() {
         if (!activeScannedClient) return;
+        const earnedPoints = orgSettings.pointsPerVisit || 30;
         activeScannedClient.visits += 1;
-        activeScannedClient.bonuses += 30;
+        activeScannedClient.bonuses += earnedPoints;
         activeScannedClient.lastVisit = 'Сегодня, ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
         saveClientToCloud(currentOrg, activeScannedClient);
         simulateCardScanByUID(activeScannedClient.uid);
-        showToast('Визит засчитан (+30 бонусов)!', 'success');
+        showToast(`Визит засчитан (+${earnedPoints} бонусов)!`, 'success');
       };
 
       window.openRedeemModal = function() {
@@ -1205,7 +1385,7 @@
       window.executeRedeemBonus = function() {
         if (!activeScannedClient) return;
         const amount = parseInt(document.getElementById('redeem-amount-input').value) || 0;
-        if (amount <=0 || activeScannedClient.bonuses < amount) {
+        if (amount <= 0 || activeScannedClient.bonuses < amount) {
           showToast('Недостаточно бонусов или неверная сумма', 'error');
           return;
         }
@@ -1220,6 +1400,7 @@
         document.getElementById('register-modal').classList.remove('hidden');
         document.getElementById('reg-uid').value = presetUID || '';
         document.getElementById('reg-nametag').value = '';
+        document.getElementById('reg-bonus').value = orgSettings.defaultBonus;
         updateLiveCardPreview();
       };
       window.closeRegisterModal = function() { document.getElementById('register-modal').classList.add('hidden'); };
@@ -1243,7 +1424,7 @@
         const uid = document.getElementById('reg-uid').value.trim();
         let nametag = document.getElementById('reg-nametag').value.trim();
         if (!nametag.startsWith('@')) nametag = '@' + nametag;
-        const bonus = parseInt(document.getElementById('reg-bonus').value) || 0;
+        const bonus = parseInt(document.getElementById('reg-bonus').value) || orgSettings.defaultBonus;
 
         const existing = clients.find(c => c.uid.toLowerCase() === uid.toLowerCase());
         const newClient = {
@@ -1262,7 +1443,7 @@
         showToast(`Карта ${nametag} активирована!`, 'success');
       };
 
-      /* Рендер карусели карт разных цветов и обновление инфо-блока */
+      // БЕЗОПАСНЫЙ РЕНДЕРИНГ КАРУСЕЛИ (ЗАЩИТА ОТ XSS)
       function renderClientsCarousel() {
         const container = document.getElementById('clients-carousel-container');
         if (!container) return;
@@ -1271,7 +1452,11 @@
 
         const filtered = clients.filter(c => c.nametag.toLowerCase().includes(searchQuery) || c.uid.toLowerCase().includes(searchQuery));
         if (filtered.length === 0) {
-          container.innerHTML = `<div class="w-full text-center py-8 text-slate-500 text-xs">Карты не найдены</div>`;
+          const emptyDiv = document.createElement('div');
+          emptyDiv.className = 'w-full text-center py-8 text-slate-500 text-xs';
+          emptyDiv.textContent = 'Карты не найдены';
+          container.appendChild(emptyDiv);
+
           document.getElementById('detail-nametag').innerText = 'Нет карт';
           document.getElementById('detail-uid').innerText = '—';
           document.getElementById('detail-visits').innerText = '0';
@@ -1284,7 +1469,6 @@
           selectedCarouselUID = filtered[0].uid;
         }
 
-        // Палитра градиентов для карт разных цветов
         const cardThemes = [
           { bg: 'linear-gradient(135deg, #3b1f48 0%, #1f112b 50%, #0b0f19 100%)', badge: 'bg-purple-500/20 text-purple-300 border-purple-500/30', glow: 'bg-purple-500/10' },
           { bg: 'linear-gradient(135deg, #18312b 0%, #111c1a 50%, #0b0f19 100%)', badge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30', glow: 'bg-emerald-500/10' },
@@ -1305,28 +1489,49 @@
             renderClientsCarousel();
           };
 
-          cardEl.innerHTML = `
-            <div class="absolute -top-12 -right-12 w-32 h-32 ${theme.glow} rounded-full blur-2xl pointer-events-none"></div>
-            <div class="flex justify-between items-start relative z-10">
-              <div class="flex items-center space-x-1.5 px-2.5 py-1 rounded-lg border ${theme.badge}">
-                <span class="font-display font-extrabold text-xs">cozis</span>
-                <span class="text-[9px] uppercase tracking-wider opacity-80">NFC</span>
-              </div>
-              <i class="fa-solid fa-wifi rotate-90 text-white/70 text-sm"></i>
+          const glowDiv = document.createElement('div');
+          glowDiv.className = `absolute -top-12 -right-12 w-32 h-32 ${theme.glow} rounded-full blur-2xl pointer-events-none`;
+          cardEl.appendChild(glowDiv);
+
+          const topDiv = document.createElement('div');
+          topDiv.className = 'flex justify-between items-start relative z-10';
+          topDiv.innerHTML = `
+            <div class="flex items-center space-x-1.5 px-2.5 py-1 rounded-lg border ${theme.badge}">
+              <span class="font-display font-extrabold text-xs">cozis</span>
+              <span class="text-[9px] uppercase tracking-wider opacity-80">NFC</span>
             </div>
-            
-            <div class="w-9 h-7 rounded-md bg-gradient-to-tr from-amber-200 to-amber-100 border border-amber-300/60 shadow-md relative z-10"></div>
-            
-            <div class="relative z-10 flex justify-between items-end">
-              <div>
-                <p class="font-display font-bold text-lg tracking-wider text-white truncate">${client.nametag}</p>
-                <p class="font-mono text-[11px] text-slate-300 mt-0.5">${client.uid}</p>
-              </div>
-              <div class="text-right">
-                <span class="text-xs font-bold text-purple-300">${client.bonuses} Б</span>
-              </div>
-            </div>
+            <i class="fa-solid fa-wifi rotate-90 text-white/70 text-sm"></i>
           `;
+          cardEl.appendChild(topDiv);
+
+          const chipDiv = document.createElement('div');
+          chipDiv.className = 'w-9 h-7 rounded-md bg-gradient-to-tr from-amber-200 to-amber-100 border border-amber-300/60 shadow-md relative z-10';
+          cardEl.appendChild(chipDiv);
+
+          const bottomDiv = document.createElement('div');
+          bottomDiv.className = 'relative z-10 flex justify-between items-end';
+
+          const infoDiv = document.createElement('div');
+          const nameP = document.createElement('p');
+          nameP.className = 'font-display font-bold text-lg tracking-wider text-white truncate';
+          nameP.textContent = client.nametag;
+          const uidp = document.createElement('p');
+          uidp.className = 'font-mono text-[11px] text-slate-300 mt-0.5';
+          uidp.textContent = client.uid;
+          infoDiv.appendChild(nameP);
+          infoDiv.appendChild(uidp);
+
+          const bonusDiv = document.createElement('div');
+          bonusDiv.className = 'text-right';
+          const bonusSpan = document.createElement('span');
+          bonusSpan.className = 'text-xs font-bold text-purple-300';
+          bonusSpan.textContent = `${client.bonuses} Б`;
+          bonusDiv.appendChild(bonusSpan);
+
+          bottomDiv.appendChild(infoDiv);
+          bottomDiv.appendChild(bonusDiv);
+          cardEl.appendChild(bottomDiv);
+
           container.appendChild(cardEl);
         });
 
@@ -1414,30 +1619,46 @@
       }
       window.renderStatsChart = renderStatsChart;
 
+      // БЕЗОПАСНЫЙ РЕНДЕРИНГ ЛИДЕРБОРДА
       function renderLeaderboard() {
         const lb = document.getElementById('stats-leaderboard');
         if (!lb) return;
         lb.innerHTML = '';
         const sorted = [...clients].sort((a,b) => b.visits - a.visits).slice(0, 3);
         if (sorted.length === 0) {
-          lb.innerHTML = '<p class="text-xs text-slate-500">Нет данных</p>';
+          const p = document.createElement('p');
+          p.className = 'text-xs text-slate-500';
+          p.textContent = 'Нет данных';
+          lb.appendChild(p);
           return;
         }
         sorted.forEach((c, idx) => {
           const row = document.createElement('div');
           row.className = 'flex items-center justify-between p-3 rounded-2xl bg-slate-900/60 border border-slate-800';
-          row.innerHTML = `
-            <div class="flex items-center space-x-3">
-              <span class="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-xs font-bold font-display text-amber-400">${idx + 1}</span>
-              <span class="font-display font-semibold text-sm text-white">${c.nametag}</span>
-            </div>
-            <span class="text-xs font-bold text-purple-400 bg-purple-500/10 px-2.5 py-1 rounded-xl border border-purple-500/20">${c.visits} визитов</span>
-          `;
+
+          const leftDiv = document.createElement('div');
+          leftDiv.className = 'flex items-center space-x-3';
+          const rankSpan = document.createElement('span');
+          rankSpan.className = 'w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-xs font-bold font-display text-amber-400';
+          rankSpan.textContent = idx + 1;
+          const nameSpan = document.createElement('span');
+          nameSpan.className = 'font-display font-semibold text-sm text-white';
+          nameSpan.textContent = c.nametag;
+          leftDiv.appendChild(rankSpan);
+          leftDiv.appendChild(nameSpan);
+
+          const visitsSpan = document.createElement('span');
+          visitsSpan.className = 'text-xs font-bold text-purple-400 bg-purple-500/10 px-2.5 py-1 rounded-xl border border-purple-500/20';
+          visitsSpan.textContent = `${c.visits} визитов`;
+
+          row.appendChild(leftDiv);
+          row.appendChild(visitsSpan);
           lb.appendChild(row);
         });
       }
       window.renderLeaderboard = renderLeaderboard;
 
+      // БЕЗОПАСНЫЙ РЕНДЕРИНГ УВЕДОМЛЕНИЙ (TOAST)
       function showToast(message, type = 'info') {
         const container = document.getElementById('toast-container');
         if (!container) return;
@@ -1449,21 +1670,97 @@
           info: 'bg-brand-900/90 border-brand-500 text-brand-100'
         };
         toast.className = `pointer-events-auto px-4 py-3 rounded-2xl border ${colors[type] || colors.info} text-xs font-medium shadow-xl flex items-center space-x-2`;
-        toast.innerHTML = `<i class="fa-solid fa-circle-check"></i><span>${message}</span>`;
+        
+        const icon = document.createElement('i');
+        icon.className = 'fa-solid fa-circle-check';
+        const span = document.createElement('span');
+        span.textContent = message;
+
+        toast.appendChild(icon);
+        toast.appendChild(span);
         container.appendChild(toast);
         setTimeout(() => toast.remove(), 3000);
       }
       window.showToast = showToast;
 
       function exportCSV() {
-        let csv = `UID,Nametag,Visits,Bonuses (Org: ${currentOrg})\n`;
-        clients.forEach(c => { csv += `"${c.uid}","${c.nametag}",${c.visits},${c.bonuses}\n`; });
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.setAttribute('href', url);
-        a.setAttribute('download', `CozisNFC_${currentOrg}_Cards.csv`);
-        a.click();
+        if (!clients || clients.length === 0) {
+          showToast('Нет данных для экспорта', 'warning');
+          return;
+        }
+
+        const orgName = currentOrg || 'Организация';
+        const now = new Date();
+        const formattedDate = now.toLocaleDateString('ru-RU');
+        const formattedTime = now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+        
+        const totalVisits = clients.reduce((sum, c) => sum + (c.visits || 0), 0);
+        const totalBonuses = clients.reduce((sum, c) => sum + (c.bonuses || 0), 0);
+
+        const escapeCell = (str) => {
+          if (str === null || str === undefined) return '""';
+          const stringified = String(str).replace(/"/g, '""');
+          return `"${stringified}"`;
+        };
+
+        const DELIMITER = ';';
+        let csvContent = '\uFEFF';
+        
+        csvContent += `${escapeCell('ОТЧЕТ ПО КАРТАМ И КЛИЕНТАМ (CozisNFC)')}${DELIMITER}\n`;
+        csvContent += `${escapeCell('Организация:')}${DELIMITER}${escapeCell(orgName)}\n`;
+        csvContent += `${escapeCell('Дата выгрузки:')}${DELIMITER}${escapeCell(`${formattedDate}${formattedTime}`)}\n`;
+        csvContent += `${escapeCell('Всего активных карт:')}${DELIMITER}${clients.length}\n`;
+        csvContent += `\n`;
+
+        const headers = [
+          '№ p/p',
+          'UID NFC-карты',
+          'UserTag / Логин',
+          'Количество визитов',
+          'Баланс бонусов (Б)',
+          'Дата последнего визита',
+          'Статус активности'
+        ];
+        csvContent += headers.map(escapeCell).join(DELIMITER) + '\n';
+
+        clients.forEach((client, index) => {
+          const row = [
+            index + 1,
+            client.uid || '—',
+            client.nametag || '—',
+            client.visits || 0,
+            client.bonuses || 0,
+            client.lastVisit || 'Нет данных',
+            (client.visits && client.visits > 0) ? 'Активен' : 'Новая карта'
+          ];
+          csvContent += row.map(escapeCell).join(DELIMITER) + '\n';
+        });
+
+        csvContent += `\n`;
+        const totalRow = [
+          'ИТОГО',
+          '',
+          `${clients.length} карт(ы)`,
+          totalVisits,
+          totalBonuses,
+          '',
+          ''
+        ];
+        csvContent += totalRow.map(escapeCell).join(DELIMITER) + '\n';
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        const isoDate = now.toISOString().split('T')[0];
+        
+        link.setAttribute('href', url);
+        link.setAttribute('download', `CozisNFC_Экспорт_${orgName}_${isoDate}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        showToast('Отчет CSV для Excel успешно скачан!', 'success');
       }
       window.exportCSV = exportCSV;
 
