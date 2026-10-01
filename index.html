@@ -546,6 +546,19 @@
           </div>
         </div>
 
+function normalizeUid(uid) {
+  if (!uid) return '';
+  // Очищаем от любых старых разделителей и переводим в верхний регистр
+  let clean = String(uid).trim().toUpperCase().replace(/[\s\-_:]/g, '');
+  
+  // Собираем пары символов, разделенные нижним подчеркиванием
+  let parts = [];
+  for (let i = 0; i < clean.length; i += 2) {
+    parts.push(clean.substr(i, 2));
+  }
+  return parts.join('_');
+}
+
         <!-- ВКЛАДКА: Карты -->
         <div id="tab-content-clients" class="hidden space-y-6 animate-fade-in">
           
@@ -1813,5 +1826,4 @@
     </script>
 </body>
 </html>
-
 
