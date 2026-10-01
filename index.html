@@ -21,7 +21,6 @@
               600: '#7c3aed',
               700: '#6d28d9',
               800: '#5b21b6',
-              900: '#4c1d95',
               950: '#2e1065',
             }
           },
@@ -201,7 +200,7 @@
             <span class="font-display font-extrabold text-3xl tracking-tight text-brand-400">cozis</span>
             <span class="font-display font-bold text-xs uppercase px-2.5 py-0.5 rounded-md bg-brand-500/20 text-brand-300 border border-brand-500/30 tracking-wider">NFC</span>
           </div>
-          <p id="auth-subtitle" class="text-xs text-slate-400">Авторизация организации / кассира</p>
+          <p id="auth-subtitle" class="text-xs text-slate-400">Авторизация организации / кассира[cite: 11]</p>
         </div>
 
         <form onsubmit="handleAuthSubmit(event)" class="space-y-4">
@@ -318,7 +317,7 @@
           </button>
           <button id="nav-clients" onclick="switchTab('clients')" class="px-4 py-2 rounded-lg text-sm font-medium transition-all text-slate-400 hover:text-white flex items-center space-x-2">
             <i class="fa-solid fa-wallet"></i>
-            <span>Карты (<span id="tab-client-count">0</span>)</span>
+            <span>Карты (<span id="tab-client-count">0</span>)[cite: 11]</span>
           </button>
           <button id="nav-stats" onclick="switchTab('stats')" class="px-4 py-2 rounded-lg text-sm font-medium transition-all text-slate-400 hover:text-white flex items-center space-x-2">
             <i class="fa-solid fa-chart-line"></i>
@@ -356,7 +355,7 @@
         </button>
         <button id="mob-nav-clients" onclick="switchTab('clients')" class="flex flex-col items-center space-y-1 text-slate-400 hover:text-white py-1 px-2">
           <i class="fa-solid fa-wallet text-base"></i>
-          <span class="text-[9px] font-medium">Карты</span>
+          <span class="text-[9px] font-medium">Карты[cite: 11]</span>
         </button>
         <button id="mob-nav-stats" onclick="switchTab('stats')" class="flex flex-col items-center space-y-1 text-slate-400 hover:text-white py-1 px-2">
           <i class="fa-solid fa-chart-line text-base"></i>
@@ -459,7 +458,7 @@
                 <div class="w-20 h-20 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-600 text-3xl">
                   <i class="fa-solid fa-address-card"></i>
                 </div>
-                <h3 class="font-display font-bold text-lg text-slate-300">Ожидание считывания карты...</h3>
+                <h3 class="font-display font-bold text-lg text-slate-300">Ожидание считывания карты...[cite: 11]</h3>
                 <p class="text-xs text-slate-500 max-w-md">
                   Поднесите чип NTAG215 к вашему смартфону. Информация появится здесь автоматически.
                 </p>
@@ -474,7 +473,7 @@
                     <div>
                       <h2 id="res-nametag" class="font-display font-bold text-2xl text-white">@nametag</h2>
                       <p class="text-xs text-slate-400 flex items-center space-x-2 mt-0.5">
-                        <span class="font-mono text-slate-400">UID: <span id="res-card-uid" class="text-brand-300">04_A2_3F_8B</span></span>
+                        <span class="font-mono text-slate-400">UID: <span id="res-card-uid" class="text-brand-300">04:A2:3F:8B</span></span>
                       </p>
                     </div>
                   </div>
@@ -750,7 +749,7 @@
                   <span class="text-[10px] text-brand-400 animate-pulse">Готов к сканированию</span>
                 </label>
                 <div class="flex space-x-2">
-                  <input type="text" id="reg-uid" required placeholder="04_FB_C6_6F_11_01_89" class="w-full glass-input px-3 py-3 text-xs font-mono text-brand-300 rounded-xl focus:outline-none" oninput="updateLiveCardPreview()">
+                  <input type="text" id="reg-uid" required placeholder="Приложите карту..." class="w-full glass-input px-3 py-3 text-xs font-mono text-brand-300 rounded-xl focus:outline-none" oninput="updateLiveCardPreview()">
                   <button type="button" onclick="generateRandomUID()" class="px-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs whitespace-nowrap transition-colors">
                     Генератор
                   </button>
@@ -783,7 +782,7 @@
                 <div class="w-7 h-5 rounded bg-amber-200/90 border border-amber-300/50 shadow-inner"></div>
                 <div>
                   <p id="prev-card-nametag" class="font-display font-bold text-base tracking-wide truncate text-white">@nametag</p>
-                  <p id="prev-card-uid" class="font-mono text-[10px] text-slate-400">04_XX_XX_XX</p>
+                  <p id="prev-card-uid" class="font-mono text-[10px] text-slate-400">04:XX:XX:XX</p>
                 </div>
               </div>
             </div>
@@ -869,18 +868,18 @@
         defaultBonus: 100
       };
 
-      // Функция нормализации UID (приводит к формату с нижним подчеркиванием и верхним регистром: 04_FB_C6_6F_11_01_89)
+      // Функция нормализации UID (всегда приводит к формату с двоеточиями и верхним регистром)
       function normalizeUid(uid) {
         if (!uid) return '';
-        let clean = String(uid).trim().toUpperCase().replace(/[\s:._-]/g, '');
-        if (clean.length % 2 === 0 && clean.length >= 4) {
+        let clean = String(uid).trim().toUpperCase().replace(/[\s-]/g, '');
+        if (!clean.includes(':') && clean.length % 2 === 0 && clean.length >= 4) {
           let parts = [];
           for (let i = 0; i < clean.length; i += 2) {
             parts.push(clean.substr(i, 2));
           }
-          return parts.join('_');
+          return parts.join(':');
         }
-        return clean.replace(/[:-\s]/g, '_');
+        return clean.replace(/-/g, ':');
       }
 
       window.initAppAfterAuth = function() {};
@@ -1003,8 +1002,8 @@
           clients = localData;
         } else if (orgName.toLowerCase() === 'test') {
           clients = [
-            { uid: '04_A2_3F_8B', nametag: '@alex_fox', visits: 14, bonuses: 420, lastVisit: 'Сегодня, 14:20' },
-            { uid: '04_88_9C_12', nametag: '@magnit_user', visits: 8, bonuses: 240, lastVisit: 'Вчера, 18:05' }
+            { uid: '04:A2:3F:8B', nametag: '@alex_fox', visits: 14, bonuses: 420, lastVisit: 'Сегодня, 14:20' },
+            { uid: '04:88:9C:12', nametag: '@magnit_user', visits: 8, bonuses: 240, lastVisit: 'Вчера, 18:05' }
           ];
           localStorage.setItem(storageKey, JSON.stringify(clients));
         } else {
@@ -1039,6 +1038,7 @@
         }
       }
 
+      // СОХРАНЕНИЕ В ЛОКАЛЬНУЮ КОЛЛЕКЦИЮ ОРГАНИЗАЦИИ И В ГЛОБАЛЬНУЮ КОЛЛЕКЦИЮ CARDS
       async function saveClientToCloud(orgName, clientObj) {
         const storageKey = `cozis_clients_${orgName.toLowerCase()}`;
         let localData = JSON.parse(localStorage.getItem(storageKey) || '[]');
@@ -1054,9 +1054,23 @@
         try {
           if (window.db && window.fsSetDoc && window.fsDoc) {
             if (!window.auth.currentUser) await signInAnonymously(window.auth);
-            const colName = `org_${orgName.toLowerCase()}_clients`;
             const docId = clientObj.uid.replace(/[:\/]/g, '_');
-            await window.fsSetDoc(window.fsDoc(window.db, 'artifacts', window.appId, 'public', 'data', colName, docId), clientObj);
+
+            // 1. Сохраняем в локальную коллекцию организации (для аналитики кассира)
+            const orgColName = `org_${orgName.toLowerCase()}_clients`;
+            await window.fsSetDoc(window.fsDoc(window.db, 'artifacts', window.appId, 'public', 'data', orgColName, docId), clientObj);
+
+            // 2. Сохраняем в глобальную корневую коллекцию cards (чтобы кошелёк клиента её увидел)
+            const globalCardData = {
+              uid: clientObj.uid,
+              nametag: clientObj.nametag,
+              points: clientObj.bonuses,
+              visits: clientObj.visits,
+              bonuses: clientObj.bonuses,
+              lastVisit: clientObj.lastVisit || '',
+              organizationId: orgName
+            };
+            await window.fsSetDoc(window.fsDoc(window.db, 'cards', docId), globalCardData, { merge: true });
           }
         } catch(e) {
           console.warn("Cloud save client warning:", e);
@@ -1101,7 +1115,7 @@
           switchBtn.innerText = 'Уже есть аккаунт? Войти';
           masterContainer.classList.remove('hidden');
         } else {
-          subtitle.innerText = 'Авторизация организации / кассира';
+          subtitle.innerText = 'Авторизация организации / кассира[cite: 11]';
           btnText.innerText = 'Войти в личный кабинет';
           switchBtn.innerText = 'Нет аккаунта организации? Зарегистрироваться';
           masterContainer.classList.add('hidden');
@@ -1313,7 +1327,6 @@
         simulateCardScanByUID(randomClient.uid);
       };
 
-      // Чтение Web NFC с нормализацией UID в формат 04_FB_C6_6F_11_01_89
       window.requestWebNFCScan = async function() {
         if ('NDEFReader' in window) {
           try {
@@ -1426,7 +1439,7 @@
 
       window.generateRandomUID = function() {
         const hex = () => Math.floor(Math.random() * 256).toString(16).padStart(2, '0').toUpperCase();
-        const randUid = `04_${hex()}_${hex()}_${hex()}_${hex()}_${hex()}_${hex()}`;
+        const randUid = `04:${hex()}:${hex()}:${hex()}`;
         document.getElementById('reg-uid').value = normalizeUid(randUid);
         updateLiveCardPreview();
       };
@@ -1435,7 +1448,7 @@
         let nametag = document.getElementById('reg-nametag').value.trim() || '@nametag';
         if (!nametag.startsWith('@')) nametag = '@' + nametag;
         const rawUid = document.getElementById('reg-uid').value;
-        const uid = normalizeUid(rawUid) || '04_XX_XX_XX';
+        const uid = normalizeUid(rawUid) || '04:XX:XX:XX';
         document.getElementById('prev-card-nametag').innerText = nametag;
         document.getElementById('prev-card-uid').innerText = uid;
       };
