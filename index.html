@@ -1062,14 +1062,15 @@
 
             // 2. Сохраняем в глобальную корневую коллекцию cards (чтобы кошелёк клиента её увидел)
             const globalCardData = {
-              uid: clientObj.uid,
-              nametag: clientObj.nametag,
-              points: clientObj.bonuses,
-              visits: clientObj.visits,
-              bonuses: clientObj.bonuses,
-              lastVisit: clientObj.lastVisit || '',
-              organizationId: orgName
-            };
+    uid: clientObj.uid,
+    nametag: clientObj.nametag,
+    points: clientObj.bonuses,
+    visits: clientObj.visits,
+    bonuses: clientObj.bonuses,
+    lastVisit: clientObj.lastVisit || '',
+    organizationId: orgName,
+    visitLog: clientObj.visitLog || []   // 
+};
             await window.fsSetDoc(window.fsDoc(window.db, 'cards', docId), globalCardData, { merge: true });
           }
         } catch(e) {
@@ -1397,15 +1398,19 @@
       };
 
       window.actionAddVisit = function() {
-        if (!activeScannedClient) return;
-        const earnedPoints = orgSettings.pointsPerVisit || 30;
-        activeScannedClient.visits += 1;
-        activeScannedClient.bonuses += earnedPoints;
-        activeScannedClient.lastVisit = 'Сегодня, ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        saveClientToCloud(currentOrg, activeScannedClient);
-        simulateCardScanByUID(activeScannedClient.uid);
-        showToast(`Визит засчитан (+${earnedPoints} бонусов)!`, 'success');
-      };
+    if (!activeScannedClient) return;
+    const earnedPoints = orgSettings.pointsPerVisit || 30;
+    activeScannedClient.visits += 1;
+    activeScannedClient.bonuses += earnedPoints;
+    activeScannedClient.lastVisit = 'Сегодня, ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+    if (!activeScannedClient.visitLog) activeScannedClient.visitLog = [];
+    activeScannedClient.visitLog.push(new Date().toISOString());
+
+    saveClientToCloud(currentOrg, activeScannedClient);
+    simulateCardScanByUID(activeScannedClient.uid);
+    showToast(`Визит засчитан (+${earnedPoints} бонусов)!`, 'success');
+};
 
       window.openRedeemModal = function() {
         if (!activeScannedClient) return;
@@ -1626,47 +1631,74 @@
       };
 
       function updateGlobalStats() {
-        const totalCards = clients.length;
-        const totalVisits = clients.reduce((acc, c) => acc + c.visits, 0);
-        const totalBonuses = clients.reduce((acc, c) => acc + c.bonuses, 0);
+    const totalCards = clients.length;
+    const totalVisits = clients.reduce((acc, c) => acc + (c.visits || 0), 0);
+    const totalBonuses = clients.reduce((acc, c) => acc + (c.bonuses || 0), 0);
 
-        document.getElementById('stat-total-cards').innerText = totalCards;
-        document.getElementById('stat-total-visits').innerText = totalVisits;
-        document.getElementById('stat-scans-today').innerText = Math.round(totalVisits * 0.45) + 2;
-        document.getElementById('stat-rewards-given').innerText = Math.round(totalBonuses / 25);
-        document.getElementById('stat-30days').innerText = totalVisits * 2;
-        document.getElementById('stat-avg-visits').innerText = totalCards > 0 ? (totalVisits / totalCards).toFixed(1) : '0.0';
-        document.getElementById('stat-retention').innerText = totalCards > 0 ? '99.1%' : '0%';
-        document.getElementById('stat-rewards-total').innerText = Math.round(totalBonuses / 20);
+    // Собираем все даты визитов со всех карт
+    const now = new Date();
+    const todayKey = now.toISOString().split('T')[0];
+    const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-        renderStatsChart(totalVisits);
-        renderLeaderboard();
-      }
+    let allVisits = [];
+    clients.forEach(c => {
+        if (Array.isArray(c.visitLog)) allVisits.push(...c.visitLog);
+    });
+
+    const scansToday = allVisits.filter(d => d.startsWith(todayKey)).length;
+    const visits30days = allVisits.filter(d => new Date(d) >= monthAgo).length;
+    const activeCards = clients.filter(c => (c.visits || 0) > 0).length;
+    const activePercent = totalCards > 0 ? ((activeCards / totalCards) * 100).toFixed(1) + '%' : '0%';
+
+    document.getElementById('stat-total-cards').innerText = totalCards;
+    document.getElementById('stat-total-visits').innerText = totalVisits;
+    document.getElementById('stat-scans-today').innerText = scansToday;
+    document.getElementById('stat-rewards-given').innerText = totalBonuses;
+    document.getElementById('stat-30days').innerText = visits30days;
+    document.getElementById('stat-avg-visits').innerText = totalCards > 0 ? (totalVisits / totalCards).toFixed(1) : '0.0';
+    document.getElementById('stat-retention').innerText = activePercent;
+    document.getElementById('stat-rewards-total').innerText = totalBonuses;
+
+    renderStatsChart(allVisits);
+    renderLeaderboard();
+}
       window.updateGlobalStats = updateGlobalStats;
 
-      function renderStatsChart(totalVisits) {
-        const container = document.getElementById('stats-chart-container');
-        if (!container) return;
-        container.innerHTML = '';
-        document.getElementById('stat-total-scans-badge').innerText = `Всего: ${totalVisits} визитов`;
+      function renderStatsChart(allVisits) {
+    const container = document.getElementById('stats-chart-container');
+    if (!container) return;
+    container.innerHTML = '';
 
-        const days = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
-        const weights = [0.12, 0.14, 0.15, 0.13, 0.18, 0.22, 0.10];
-        let maxVal = Math.max(...weights.map(w => Math.round(totalVisits * w))) || 10;
+    // Считаем визиты по дням недели (0 = Пн, 6 = Вс)
+    const counts = [0, 0, 0, 0, 0, 0, 0];
+    if (Array.isArray(allVisits)) {
+        allVisits.forEach(iso => {
+            const d = new Date(iso);
+            if (isNaN(d)) return;
+            const dow = (d.getDay() + 6) % 7; // Пн=0 ... Вс=6
+            counts[dow]++;
+        });
+    }
 
-        days.forEach((day, i) => {
-          const val = Math.max(4, Math.round((totalVisits || 10) * weights[i]));
-          const heightPct = Math.min(100, Math.max(15, Math.round((val / maxVal) * 100)));
-          const col = document.createElement('div');
-          col.className = 'flex-1 flex flex-col items-center h-full justify-end group';
-          col.innerHTML = `
+    const total = counts.reduce((a, b) => a + b, 0);
+    document.getElementById('stat-total-scans-badge').innerText = `Всего: ${total} визитов`;
+
+    const days = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+    const maxVal = Math.max(...counts, 1);
+
+    days.forEach((day, i) => {
+        const val = counts[i];
+        const heightPct = Math.max(5, Math.round((val / maxVal) * 100));
+        const col = document.createElement('div');
+        col.className = 'flex-1 flex flex-col items-center h-full justify-end group';
+        col.innerHTML = `
             <div class="text-[10px] text-brand-300 opacity-0 group-hover:opacity-100 transition-opacity mb-1 font-mono">${val}</div>
             <div style="height: ${heightPct}%" class="w-full max-w-[32px] bg-gradient-to-t from-brand-700 to-brand-500 rounded-t-xl transition-all shadow-lg"></div>
             <span class="text-[11px] text-slate-400 mt-2 font-medium">${day}</span>
-          `;
-          container.appendChild(col);
-        });
-      }
+        `;
+        container.appendChild(col);
+    });
+}
       window.renderStatsChart = renderStatsChart;
 
       function renderLeaderboard() {
