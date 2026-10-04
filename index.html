@@ -720,7 +720,41 @@
                 <p class="text-[11px] text-slate-500 mt-1">Автоматический бонус для новых клиентов при первичной регистрации карты.</p>
               </div>
 
-              <div class="pt-4">
+              <div class="pt-2 border-t border-slate-800/80 space-y-4">
+  <div>
+    <span class="text-xs font-semibold text-slate-300 block mb-2">4. Оформление приложения</span>
+    <span class="text-[11px] text-slate-500 block mb-3">Выберите цветовую тему интерфейса</span>
+  </div>
+  <div class="grid grid-cols-2 gap-3">
+    <button type="button" onclick="setTheme('purple')" id="theme-btn-purple"
+            class="rounded-2xl p-4 border transition-all text-left"
+            style="background: linear-gradient(135deg, #2e1065 0%, #0b0f19 100%); border-color: rgba(192,132,252,0.5);">
+      <div class="flex items-center justify-between mb-2">
+        <span class="font-display font-bold text-sm text-white">Purple</span>
+        <i class="fa-solid fa-check-circle text-purple-300" style="display:none;" data-check></i>
+      </div>
+      <div class="flex gap-1">
+        <span class="w-4 h-4 rounded-full" style="background:#8b5cf6;"></span>
+        <span class="w-4 h-4 rounded-full" style="background:#c084fc;"></span>
+        <span class="w-4 h-4 rounded-full" style="background:#0b0f19;border:1px solid #333;"></span>
+      </div>
+    </button>
+    <button type="button" onclick="setTheme('luxury')" id="theme-btn-luxury"
+            class="rounded-2xl p-4 border transition-all text-left"
+            style="background: linear-gradient(135deg, #1a1a1a 0%, #050505 100%); border-color: rgba(212,175,55,0.4);">
+      <div class="flex items-center justify-between mb-2">
+        <span class="font-display font-bold text-sm" style="color:#d4af37;">Luxury Black</span>
+        <i class="fa-solid fa-check-circle" style="color:#d4af37;display:none;" data-check></i>
+      </div>
+      <div class="flex gap-1">
+        <span class="w-4 h-4 rounded-full" style="background:#000;border:1px solid #333;"></span>
+        <span class="w-4 h-4 rounded-full" style="background:#888;"></span>
+        <span class="w-4 h-4 rounded-full" style="background:#d4af37;"></span>
+      </div>
+    </button>
+  </div>
+</div>
+<div class="pt-4">
                 <button type="submit" class="w-full bg-gradient-to-r from-brand-500 to-brand-700 hover:from-brand-400 hover:to-brand-600 text-white py-3.5 rounded-xl font-bold text-sm shadow-lg shadow-brand-700/30 transition-all flex items-center justify-center space-x-2">
                   <i class="fa-solid fa-floppy-disk"></i>
                   <span>Сохранить настройки организации</span>
@@ -900,6 +934,47 @@
             defaultBonus: 100
           };
         }
+/* ============ СМЕНА ТЕМЫ ============ */
+window.setTheme = function(theme) {
+    const body = document.body;
+    body.classList.remove('theme-purple', 'theme-luxury');
+    if (theme === 'luxury') {
+      body.classList.add('theme-luxury');
+    } else {
+      body.classList.add('theme-purple');
+    }
+    localStorage.setItem('cozis_theme', theme);
+    updateThemeButtons(theme);
+    showToast('Тема: ' + (theme === 'luxury' ? 'Luxury Black' : 'Purple'), 'success');
+
+    if (typeof updateGlobalStats === 'function') updateGlobalStats();
+};
+
+function updateThemeButtons(active) {
+  const btns = document.querySelectorAll('[data-check]');
+  btns.forEach(b => b.style.display = 'none');
+  const purpleBtn = document.getElementById('theme-btn-purple');
+  const luxuryBtn = document.getElementById('theme-btn-luxury');
+  if (active === 'luxury' && luxuryBtn) {
+    const chk = luxuryBtn.querySelector('[data-check]');
+    if (chk) chk.style.display = 'inline-block';
+  } else if (purpleBtn) {
+    const chk = purpleBtn.querySelector('[data-check]');
+    if (chk) chk.style.display = 'inline-block';
+  }
+}
+
+// Применяем сохранённую тему при загрузке
+(function applySavedTheme() {
+  const saved = localStorage.getItem('cozis_theme') || 'purple';
+  if (saved === 'luxury') {
+    document.body.classList.add('theme-luxury');
+  }
+  // Обновляем галочки после того, как DOM загрузится
+  document.addEventListener('DOMContentLoaded', function() {
+    updateThemeButtons(saved);
+  });
+})();
         
         if (document.getElementById('setting-points-per-visit')) {
           document.getElementById('setting-points-per-visit').value = orgSettings.pointsPerVisit;
@@ -1664,37 +1739,30 @@
 }
       window.updateGlobalStats = updateGlobalStats;
 
-      function renderStatsChart(allVisits) {
+      function renderStatsChart(totalVisits) {
     const container = document.getElementById('stats-chart-container');
     if (!container) return;
     container.innerHTML = '';
-
-    // Считаем визиты по дням недели (0 = Пн, 6 = Вс)
-    const counts = [0, 0, 0, 0, 0, 0, 0];
-    if (Array.isArray(allVisits)) {
-        allVisits.forEach(iso => {
-            const d = new Date(iso);
-            if (isNaN(d)) return;
-            const dow = (d.getDay() + 6) % 7; // Пн=0 ... Вс=6
-            counts[dow]++;
-        });
-    }
-
-    const total = counts.reduce((a, b) => a + b, 0);
-    document.getElementById('stat-total-scans-badge').innerText = `Всего: ${total} визитов`;
+    document.getElementById('stat-total-scans-badge').innerText = `Всего: ${totalVisits} визитов`;
 
     const days = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
-    const maxVal = Math.max(...counts, 1);
+    const weights = [0.12, 0.14, 0.15, 0.13, 0.18, 0.22, 0.10];
+    const maxVal = Math.max(...weights.map(w => Math.round(totalVisits * w))) || 10;
+    const isLuxury = document.body.classList.contains('theme-luxury');
 
     days.forEach((day, i) => {
-        const val = counts[i];
-        const heightPct = Math.max(5, Math.round((val / maxVal) * 100));
+        const val = Math.max(4, Math.round((totalVisits || 10) * weights[i]));
+        const heightPct = Math.min(100, Math.max(15, Math.round((val / maxVal) * 100)));
         const col = document.createElement('div');
         col.className = 'flex-1 flex flex-col items-center h-full justify-end group';
+        const barStyle = isLuxury
+            ? 'background: linear-gradient(to top, #8a6d1f 0%, #d4af37 60%, #f0d574 100%); box-shadow: 0 0 12px rgba(212,175,55,0.35);'
+            : 'background: linear-gradient(to top, #6d28d9, #8b5cf6); box-shadow: 0 0 12px rgba(139,92,246,0.4);';
+        const labelColor = isLuxury ? '#d4af37' : '#a78bfa';
         col.innerHTML = `
-            <div class="text-[10px] text-brand-300 opacity-0 group-hover:opacity-100 transition-opacity mb-1 font-mono">${val}</div>
-            <div style="height: ${heightPct}%" class="w-full max-w-[32px] bg-gradient-to-t from-brand-700 to-brand-500 rounded-t-xl transition-all shadow-lg"></div>
-            <span class="text-[11px] text-slate-400 mt-2 font-medium">${day}</span>
+            <div class="text-[10px] opacity-0 group-hover:opacity-100 transition-opacity mb-1 font-mono" style="color: ${labelColor};">${val}</div>
+            <div style="height: ${heightPct}%; ${barStyle}" class="w-full max-w-[32px] rounded-t-xl transition-all"></div>
+            <span class="text-[11px] mt-2 font-medium" style="color: #a3a3a3;">${day}</span>
         `;
         container.appendChild(col);
     });
@@ -1702,41 +1770,55 @@
       window.renderStatsChart = renderStatsChart;
 
       function renderLeaderboard() {
-        const lb = document.getElementById('stats-leaderboard');
-        if (!lb) return;
-        lb.innerHTML = '';
-        const sorted = [...clients].sort((a,b) => b.visits - a.visits).slice(0, 3);
-        if (sorted.length === 0) {
-          const p = document.createElement('p');
-          p.className = 'text-xs text-slate-500';
-          p.textContent = 'Нет данных';
-          lb.appendChild(p);
-          return;
-        }
-        sorted.forEach((c, idx) => {
-          const row = document.createElement('div');
-          row.className = 'flex items-center justify-between p-3 rounded-2xl bg-slate-900/60 border border-slate-800';
+    const lb = document.getElementById('stats-leaderboard');
+    if (!lb) return;
+    lb.innerHTML = '';
 
-          const leftDiv = document.createElement('div');
-          leftDiv.className = 'flex items-center space-x-3';
-          const rankSpan = document.createElement('span');
-          rankSpan.className = 'w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-xs font-bold font-display text-amber-400';
-          rankSpan.textContent = idx + 1;
-          const nameSpan = document.createElement('span');
-          nameSpan.className = 'font-display font-semibold text-sm text-white';
-          nameSpan.textContent = c.nametag;
-          leftDiv.appendChild(rankSpan);
-          leftDiv.appendChild(nameSpan);
+    // Список ID демо-карт, которые не должны попадать в статистику
+    const DEMO_UIDS = ['04:A2:3F:8B', '04:88:9C:12'];
+    const DEMO_TAGS = ['@alex_fox', '@magnit_user'];
 
-          const visitsSpan = document.createElement('span');
-          visitsSpan.className = 'text-xs font-bold text-purple-400 bg-purple-500/10 px-2.5 py-1 rounded-xl border border-purple-500/20';
-          visitsSpan.textContent = `${c.visits} визитов`;
+    // Фильтруем демо-карты
+    const realClients = clients.filter(c => {
+      const uid = (c.uid || '').toUpperCase();
+      const tag = (c.nametag || '').toLowerCase();
+      return !DEMO_UIDS.includes(uid) && !DEMO_TAGS.includes(tag);
+    });
 
-          row.appendChild(leftDiv);
-          row.appendChild(visitsSpan);
-          lb.appendChild(row);
-        });
-      }
+    const sorted = [...realClients].sort((a, b) => b.visits - a.visits).slice(0, 3);
+
+    if (sorted.length === 0) {
+      const p = document.createElement('p');
+      p.className = 'text-xs text-slate-500';
+      p.textContent = 'Нет данных';
+      lb.appendChild(p);
+      return;
+    }
+
+    sorted.forEach((c, idx) => {
+      const row = document.createElement('div');
+      row.className = 'flex items-center justify-between p-3 rounded-2xl bg-slate-900/60 border border-slate-800';
+
+      const leftDiv = document.createElement('div');
+      leftDiv.className = 'flex items-center space-x-3';
+      const rankSpan = document.createElement('span');
+      rankSpan.className = 'w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-xs font-bold font-display text-amber-400';
+      rankSpan.textContent = idx + 1;
+      const nameSpan = document.createElement('span');
+      nameSpan.className = 'font-display font-semibold text-sm text-white';
+      nameSpan.textContent = c.nametag;
+      leftDiv.appendChild(rankSpan);
+      leftDiv.appendChild(nameSpan);
+
+      const visitsSpan = document.createElement('span');
+      visitsSpan.className = 'text-xs font-bold text-purple-400 bg-purple-500/10 px-2.5 py-1 rounded-xl border border-purple-500/20';
+      visitsSpan.textContent = `${c.visits} визитов`;
+
+      row.appendChild(leftDiv);
+      row.appendChild(visitsSpan);
+      lb.appendChild(row);
+    });
+}
       window.renderLeaderboard = renderLeaderboard;
 
       function showToast(message, type = 'info') {
@@ -1851,4 +1933,389 @@
       };
     </script>
 </body>
+<body class="min-h-screen flex flex-col antialiased selection:bg-brand-500 selection:text-white pb-20 sm:pb-0">
+
+  <!-- ЗАСТАВКА (Вариант 1) — вставить ЗДЕСЬ -->
+  <div id="intro-screen" style="position:fixed;inset:0;z-index:9999;background:#05030a;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+
+  <!-- Фоновые светящиеся пятна -->
+  <div style="position:absolute;top:-20%;left:-10%;width:70vw;height:70vw;border-radius:50%;background:radial-gradient(circle, rgba(139,92,246,0.35) 0%, transparent 60%);filter:blur(80px);pointer-events:none;animation: introBlob 14s ease-in-out infinite alternate;"></div>
+  <div style="position:absolute;bottom:-20%;right:-10%;width:60vw;height:60vw;border-radius:50%;background:radial-gradient(circle, rgba(192,132,252,0.28) 0%, transparent 60%);filter:blur(80px);pointer-events:none;animation: introBlob 18s ease-in-out infinite alternate-reverse;"></div>
+
+  <!-- Тонкая сетка на фоне -->
+  <div style="position:absolute;inset:0;background-image:
+      linear-gradient(rgba(139,92,246,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(139,92,246,0.06) 1px, transparent 1px);
+      background-size:48px 48px;pointer-events:none;opacity:0.7;"></div>
+
+  <!-- Виньетка -->
+  <div style="position:absolute;inset:0;background:radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.65) 60%, rgba(0,0,0,0.95) 100%);pointer-events:none;"></div>
+
+  <!-- Логотип-плашка -->
+  <div style="position:absolute;top:calc(50% - clamp(130px, 20vw, 220px));left:50%;transform:translateX(-50%);z-index:2;
+              display:inline-flex;align-items:center;justify-content:center;
+              width:clamp(70px, 14vw, 110px);height:clamp(70px, 14vw, 110px);
+              border-radius:24px;
+              background:linear-gradient(135deg, rgba(139,92,246,0.35), rgba(88,28,135,0.35));
+              border:1px solid rgba(192,132,252,0.55);
+              box-shadow:0 0 40px rgba(139,92,246,0.45), inset 0 1px 0 rgba(255,255,255,0.15);
+              backdrop-filter:blur(12px);
+              animation: introPop 1.2s cubic-bezier(0.19, 1, 0.22, 1) 0.2s both;">
+    <i class="fa-solid fa-paw" style="color:#e9d5ff;font-size:clamp(32px, 6vw, 48px);text-shadow:0 0 20px rgba(192,132,252,0.9);"></i>
+  </div>
+
+  <!-- Большое название CozisNFC -->
+  <h1 id="intro-title" style="
+      position:absolute;
+      top:50%;
+      left:50%;
+      transform:translate(-50%,-50%);
+      z-index:3;
+      margin:0;
+      font-family:'Outfit', 'Syne', sans-serif;
+      font-weight:900;
+      font-size:clamp(48px, 12vw, 140px);
+      letter-spacing:0.04em;
+      text-transform:uppercase;
+      color:#e9d5ff;
+      text-shadow:
+        0 0 12px rgba(139,92,246,0.9),
+        0 0 32px rgba(139,92,246,0.6),
+        0 0 64px rgba(139,92,246,0.35),
+        0 4px 24px rgba(0,0,0,0.9);
+      opacity:0;
+      animation:
+        introTitleIn 1.6s cubic-bezier(0.19, 1, 0.22, 1) 0.4s forwards,
+        introGlow 3s ease-in-out 2s infinite alternate;
+      pointer-events:none;
+      white-space:nowrap;
+    ">CozisNFC</h1>
+
+  <!-- Подзаголовок -->
+  <div id="intro-subtitle" style="
+      position:absolute;
+      top:calc(50% + clamp(44px, 9vw, 100px));
+      left:50%;
+      transform:translateX(-50%);
+      z-index:3;
+      font-family:'Inter', sans-serif;
+      font-weight:600;
+      font-size:clamp(11px, 1.6vw, 15px);
+      letter-spacing:0.55em;
+      text-transform:uppercase;
+      color:#c4b5fd;
+      opacity:0;
+      animation: introFadeUp 1.2s ease 1.3s forwards;
+      pointer-events:none;
+      white-space:nowrap;
+      padding-left:0.55em;
+    ">NFC • LOYALTY SYSTEM</div>
+
+  <!-- Кнопка НАЧАТЬ -->
+  <button id="intro-start-btn"
+          style="position:absolute;
+                 top:calc(50% + clamp(100px, 18vw, 200px));
+                 left:50%;transform:translateX(-50%);
+                 z-index:4;
+                 background:linear-gradient(135deg, rgba(139,92,246,0.45), rgba(88,28,135,0.55));
+                 border:1px solid rgba(192,132,252,0.7);
+                 color:#f5f3ff;
+                 padding:14px 44px;
+                 border-radius:36px;
+                 font-family:'Inter', sans-serif;
+                 font-weight:700;
+                 font-size:14px;
+                 letter-spacing:3px;
+                 text-transform:uppercase;
+                 cursor:pointer;
+                 backdrop-filter:blur(12px);
+                 box-shadow:0 0 30px rgba(139,92,246,0.4), inset 0 1px 0 rgba(255,255,255,0.15);
+                 transition:transform 0.2s ease, box-shadow 0.3s ease, opacity 0.6s ease;
+                 opacity:0;
+                 animation: introFadeUp 1.2s ease 1.9s forwards;"
+          onmouseover="this.style.transform='translateX(-50%) scale(1.05)'; this.style.boxShadow='0 0 50px rgba(192,132,252,0.7), inset 0 1px 0 rgba(255,255,255,0.2)';"
+          onmouseout="this.style.transform='translateX(-50%) scale(1)'; this.style.boxShadow='0 0 30px rgba(139,92,246,0.4), inset 0 1px 0 rgba(255,255,255,0.15)';"
+          onmousedown="this.style.transform='translateX(-50%) scale(0.97)';"
+          onmouseup="this.style.transform='translateX(-50%) scale(1.05)';">
+    Начать
+  </button>
+</div>
+
+<style>
+  @keyframes introTitleIn {
+    0%   { opacity:0; transform:translate(-50%,-50%) scale(0.85); filter:blur(14px); }
+    60%  { opacity:1; transform:translate(-50%,-50%) scale(1.03); filter:blur(0px); }
+    100% { opacity:1; transform:translate(-50%,-50%) scale(1); }
+  }
+  @keyframes introFadeUp {
+    0%   { opacity:0; transform:translateX(-50%) translateY(10px); }
+    100% { opacity:1; transform:translateX(-50%) translateY(0); }
+  }
+  @keyframes introPop {
+    0%   { opacity:0; transform:translateX(-50%) scale(0.6); filter:blur(8px); }
+    100% { opacity:1; transform:translateX(-50%) scale(1); filter:blur(0px); }
+  }
+  @keyframes introGlow {
+    0%   { text-shadow: 0 0 12px rgba(139,92,246,0.9), 0 0 32px rgba(139,92,246,0.6), 0 0 64px rgba(139,92,246,0.35); }
+    100% { text-shadow: 0 0 20px rgba(192,132,252,1), 0 0 52px rgba(139,92,246,0.9), 0 0 100px rgba(139,92,246,0.55); }
+  }
+  @keyframes introBlob {
+    0%   { transform: translate(0,0) scale(1); }
+    100% { transform: translate(10%, 8%) scale(1.15); }
+  }
+/* ============ ТЕМА LUXURY BLACK ============ */
+/* ============ ТЕМА LUXURY BLACK ============ */
+body.theme-luxury {
+    background-color: #0a0a0a;
+    color: #e5e5e5;
+}
+
+/* Панели и карточки */
+body.theme-luxury .glass-panel {
+    background: rgba(20, 20, 20, 0.85);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+body.theme-luxury .glass-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(15, 15, 15, 0.75) 100%);
+    border-color: rgba(212, 175, 55, 0.25);
+}
+body.theme-luxury .glass-input {
+    background: rgba(15, 15, 15, 0.8);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #f5f5f5;
+}
+body.theme-luxury .glass-input:focus {
+    border-color: rgba(212, 175, 55, 0.7);
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
+}
+
+/* Фоны slate → чёрные/тёмно-серые */
+body.theme-luxury .bg-slate-900\/80,
+body.theme-luxury .bg-slate-900,
+body.theme-luxury .bg-slate-950\/95,
+body.theme-luxury .bg-slate-950\/90 {
+    background-color: rgba(15, 15, 15, 0.95) !important;
+}
+body.theme-luxury .border-slate-800,
+body.theme-luxury .border-slate-700 {
+    border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* ФИОЛЕТОВЫЙ → НЕЙТРАЛЬНЫЙ/ЗОЛОТОЙ */
+body.theme-luxury .text-brand-400,
+body.theme-luxury .text-brand-300,
+body.theme-luxury .text-brand-500,
+body.theme-luxury .text-purple-400,
+body.theme-luxury .text-purple-300,
+body.theme-luxury .text-purple-500,
+body.theme-luxury .text-violet-400,
+body.theme-luxury .text-violet-500,
+body.theme-luxury .text-emerald-400,
+body.theme-luxury .text-emerald-500,
+body.theme-luxury .text-amber-400,
+body.theme-luxury .text-blue-400,
+body.theme-luxury .text-rose-400 {
+    color: #a3a3a3 !important;
+}
+
+/* Иконки-акценты — золотые */
+body.theme-luxury .text-brand-400 i,
+body.theme-luxury .text-brand-300 i,
+body.theme-luxury .text-purple-400 i,
+body.theme-luxury .text-purple-300 i,
+body.theme-luxury .text-violet-400 i,
+body.theme-luxury .text-amber-400 i {
+    color: #d4af37 !important;
+}
+
+/* Фоны с фиолетовым → тёмно-серые */
+body.theme-luxury .bg-brand-600,
+body.theme-luxury .bg-brand-500,
+body.theme-luxury .bg-brand-700,
+body.theme-luxury .bg-purple-500\/10,
+body.theme-luxury .bg-purple-500\/20,
+body.theme-luxury .bg-violet-500\/10,
+body.theme-luxury .bg-brand-500\/10,
+body.theme-luxury .bg-brand-600\/10,
+body.theme-luxury .bg-brand-500\/20,
+body.theme-luxury .bg-emerald-500\/20,
+body.theme-luxury .bg-amber-500\/20,
+body.theme-luxury .bg-blue-500\/20,
+body.theme-luxury .bg-rose-500\/20 {
+    background-color: rgba(40, 40, 40, 0.6) !important;
+}
+
+/* Градиенты кнопок: фиолетовый → тёмно-серый */
+body.theme-luxury .bg-gradient-to-r,
+body.theme-luxury .bg-gradient-to-tr,
+body.theme-luxury .bg-gradient-to-br,
+body.theme-luxury .bg-gradient-to-t {
+    background-image: linear-gradient(135deg, #2a2a2a 0%, #0f0f0f 100%) !important;
+}
+body.theme-luxury button.bg-gradient-to-r,
+body.theme-luxury button.bg-gradient-to-tr {
+    color: #d4af37 !important;
+    border: 1px solid rgba(212, 175, 55, 0.4) !important;
+}
+
+/* Тени фиолетовые → золотые */
+body.theme-luxury .shadow-brand-600\/40,
+body.theme-luxury .shadow-brand-600\/30,
+body.theme-luxury .shadow-brand-700\/30,
+body.theme-luxury .shadow-purple-600\/30,
+body.theme-luxury .shadow-purple-500\/30 {
+    box-shadow: 0 0 24px rgba(212, 175, 55, 0.15) !important;
+}
+
+/* Активная навигация */
+body.theme-luxury #nav-pos.bg-brand-600,
+body.theme-luxury .bg-brand-600.text-white {
+    background-color: #2a2a2a !important;
+    color: #d4af37 !important;
+    border: 1px solid rgba(212, 175, 55, 0.35) !important;
+}
+
+/* Карточки карусели — чёрные с золотом */
+body.theme-luxury .metal-card {
+    background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%) !important;
+    border: 1px solid rgba(212, 175, 55, 0.35) !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+body.theme-luxury .metal-card.active-card {
+    border-color: rgba(212, 175, 55, 0.85) !important;
+    box-shadow: 0 0 30px rgba(212, 175, 55, 0.25), 0 20px 40px rgba(0, 0, 0, 0.9) !important;
+}
+body.theme-luxury .metal-card .text-white,
+body.theme-luxury .metal-card .font-display {
+    color: #d4af37 !important;
+}
+body.theme-luxury .metal-card .text-slate-300,
+body.theme-luxury .metal-card .text-slate-400 {
+    color: #d4d4d4 !important;
+}
+body.theme-luxury .metal-card .text-purple-300,
+body.theme-luxury .metal-card .text-brand-300 {
+    color: #d4af37 !important;
+}
+
+/* ============ ДИАГРАММА: ЗОЛОТАЯ ============ */
+body.theme-luxury #stats-chart-container > div > div[style*="height"] {
+    background: linear-gradient(to top, #8a6d1f 0%, #d4af37 60%, #f0d574 100%) !important;
+    box-shadow: 0 0 12px rgba(212, 175, 55, 0.35) !important;
+}
+body.theme-luxury #stats-chart-container .text-brand-300 {
+    color: #d4af37 !important;
+}
+body.theme-luxury #stats-chart-container .text-slate-400 {
+    color: #a3a3a3 !important;
+}
+body.theme-luxury #stats-chart-container {
+    border-bottom-color: rgba(212, 175, 55, 0.25) !important;
+}
+body.theme-luxury #stat-total-scans-badge {
+    color: #d4af37 !important;
+    border-color: rgba(212, 175, 55, 0.35) !important;
+    background-color: rgba(20, 20, 20, 0.9) !important;
+}
+
+/* Верхние плитки статистики — золотые верхние полосы */
+body.theme-luxury .border-t-brand-500,
+body.theme-luxury .border-t-purple-500,
+body.theme-luxury .border-t-violet-500,
+body.theme-luxury .border-t-brand-700,
+body.theme-luxury .border-l-brand-500,
+body.theme-luxury .border-l-purple-500,
+body.theme-luxury .border-l-violet-500,
+body.theme-luxury .border-l-brand-600 {
+    border-color: #d4af37 !important;
+}
+
+/* Проценты/цифры в статистике */
+body.theme-luxury #stat-30days,
+body.theme-luxury #stat-avg-visits,
+body.theme-luxury #stat-retention,
+body.theme-luxury #stat-rewards-total,
+body.theme-luxury #stat-scans-today,
+body.theme-luxury #stat-total-cards,
+body.theme-luxury #stat-total-visits,
+body.theme-luxury #stat-rewards-given {
+    color: #f5f5f5 !important;
+}
+
+/* Leaderboard */
+body.theme-luxury #stats-leaderboard .bg-purple-500\/10 {
+    background-color: rgba(212, 175, 55, 0.1) !important;
+    border-color: rgba(212, 175, 55, 0.3) !important;
+}
+body.theme-luxury #stats-leaderboard .text-purple-400 {
+    color: #d4af37 !important;
+}
+body.theme-luxury #stats-leaderboard .text-amber-400 {
+    color: #d4af37 !important;
+}
+
+/* Верхняя полоса активной карты в карусели */
+body.theme-luxury .shadow-brand-600\/50,
+body.theme-luxury .shadow-purple-500\/30 {
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.3) !important;
+}
+
+/* Свечения при наведении (где используется фиолетовый) */
+body.theme-luxury .hover\:border-brand-500\/50:hover,
+body.theme-luxury .hover\:border-brand-500:hover {
+    border-color: rgba(212, 175, 55, 0.6) !important;
+}
+body.theme-luxury .hover\:from-brand-400:hover,
+body.theme-luxury .hover\:to-brand-600:hover {
+    background-image: linear-gradient(135deg, #3a3a3a 0%, #1a1a1a 100%) !important;
+}
+
+/* Точка-пульс в терминале */
+body.theme-luxury .bg-brand-400 {
+    background-color: #d4af37 !important;
+}
+
+/* Иконки FontAwesome, оставшиеся фиолетовыми */
+body.theme-luxury i.fa-solid,
+body.theme-luxury i.fa-regular {
+    color: inherit;
+}
+body.theme-luxury .text-brand-400 i,
+body.theme-luxury .text-brand-300 i,
+body.theme-luxury .text-purple-400 i,
+body.theme-luxury .text-purple-300 i {
+    color: #d4af37 !important;
+}
+</style>
+
+<script>
+(function() {
+  var screen = document.getElementById('intro-screen');
+  var btn = document.getElementById('intro-start-btn');
+
+  if (!btn || !screen) return;
+
+  var clicked = false;
+
+  function onClick() {
+    if (clicked) return;
+    clicked = true;
+
+    // Мгновенно убираем заставку
+    screen.remove();
+  }
+
+  btn.addEventListener('click', onClick);
+  btn.addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    onClick();
+  }, { passive: false });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      if (document.getElementById('intro-screen')) onClick();
+    }
+  });
+})();
+</script>
 </html>
